@@ -1,15 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single" android:id="@+id/nav_group">
+        <item
+            android:icon="@mipmap/ic_new_entry"
+            android:id="@+id/menu_new_entry"
+            android:title="New Entry" />
+        <item
+            android:id="@+id/menu_past_entries"
+            android:icon="@mipmap/ic_view_past"
+            android:title="Past Entries" />
+        <item
+            android:id="@+id/menu_view_graph"
+            android:icon="@mipmap/ic_graph"
+            android:title="View Graph" />
+    </group>
 
-    <item
-        android:id="@+id/menu_new_entry"
-        android:title="New Entry" />
-    <item
-        android:id="@+id/menu_past_entries"
-        android:title="Past Entries" />
-    <item
-        android:id="@+id/menu_view_graph"
-        android:title="View Graph" />
 
 </menu>
