@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/menu_new_entry"
+        android:title="New Entry" />
+    <item
+        android:id="@+id/menu_past_entries"
+        android:title="Past Entries" />
+    <item
+        android:id="@+id/menu_view_graph"
+        android:title="View Graph" />
+
+</menu>
