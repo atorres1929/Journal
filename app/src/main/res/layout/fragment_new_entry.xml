@@ -1,26 +1,69 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.artifexiumgames.journal.NewEntryFragment"
-    android:background="@color/colorPrimary"
-    android:textAlignment="textStart"
-    android:scrollbarAlwaysDrawHorizontalTrack="false"
-    android:scrollbarAlwaysDrawVerticalTrack="true"
-    android:visibility="visible">
+    android:layout_height="match_parent">
 
-    <!-- TODO: Update blank fragment layout -->
+    <ScrollView
+        android:layout_width="match_parent"
+        tools:context="com.artifexiumgames.journal.NewEntryFragment"
+        android:background="@color/colorPrimary"
+        android:textAlignment="textStart"
+        android:scrollbarAlwaysDrawHorizontalTrack="false"
+        android:scrollbarAlwaysDrawVerticalTrack="true"
+        android:visibility="visible"
+        android:padding="0dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tabButton">
 
-    <MultiAutoCompleteTextView
-        android:text="@string/large_text"
+        <!-- TODO: Update blank fragment layout -->
+
+        <MultiAutoCompleteTextView
+            android:text="@string/large_text"
+            android:layout_width="match_parent"
+            android:id="@+id/newEntryTextView"
+            android:gravity="top|start"
+            android:textColor="@android:color/white"
+            android:layout_height="wrap_content" />
+    </ScrollView>
+
+    <Button
+        android:text="@string/tab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:id="@+id/tabButton"
+        android:background="@color/colorButton"
         android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:id="@+id/multiAutoCompleteTextView"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:gravity="top|start"
-        android:textColor="@android:color/white"
-        android:background="@color/colorPrimary" />
-</ScrollView>
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:text="@string/down"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/scrollDownButton"
+        android:background="@color/colorButton"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:text="@string/time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/timeButton"
+        android:background="@color/colorButton"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/tabButton"
+        tools:ignore="RelativeOverlap" />
+
+    <Button
+        android:text="@string/up"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/scrollUpButton"
+        android:background="@color/colorButton"
+        android:layout_alignParentTop="true"
+        android:layout_toStartOf="@+id/scrollDownButton"
+        tools:ignore="RelativeOverlap" />
+
+</RelativeLayout>
