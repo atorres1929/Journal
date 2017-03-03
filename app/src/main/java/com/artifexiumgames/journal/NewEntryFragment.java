@@ -1,15 +1,23 @@
 package com.artifexiumgames.journal;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.AlertDialogLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+
+import java.util.Calendar;
 
 
 /**
@@ -32,6 +40,7 @@ public class NewEntryFragment extends Fragment implements View.OnClickListener{
 
     private Button tabButton;
     private Button timeButton;
+    private Button dateButton;
     private Button upButton;
     private Button downButton;
     private EditText entryText;
@@ -66,7 +75,7 @@ public class NewEntryFragment extends Fragment implements View.OnClickListener{
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -76,19 +85,17 @@ public class NewEntryFragment extends Fragment implements View.OnClickListener{
 
         tabButton = (Button) v.findViewById(R.id.tabButton);
         timeButton = (Button) v.findViewById(R.id.timeButton);
+        dateButton = (Button) v.findViewById(R.id.dateButton);
         upButton = (Button) v.findViewById(R.id.scrollUpButton);
         downButton = (Button) v.findViewById(R.id.scrollDownButton);
         entryText = (EditText) v.findViewById(R.id.newEntryTextView);
         tabButton.setOnClickListener(this);
-
+        timeButton.setOnClickListener(this);
+        dateButton.setOnClickListener(this);
+        upButton.setOnClickListener(this);
+        downButton.setOnClickListener(this);
         return v;
-    }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(View view) {
-        if (mListener != null) {
-            mListener.onFragmentClick(view);
-        }
     }
 
     @Override
@@ -109,22 +116,73 @@ public class NewEntryFragment extends Fragment implements View.OnClickListener{
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater){
+        menu.clear();
+        inflater.inflate(R.menu.new_entry, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        switch (item.getItemId()){
+            case R.id.action_save_entry:
+                //TODO: save encrypted journal log to memory
+                return true;
+
+            case R.id.action_clear_entry:
+                new AlertDialog.Builder(getContext(), android.R.style.Theme_Material_Dialog_Alert)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setTitle("Clear Entry?")
+                        .setMessage("Are you sure you want to clear your entry?")
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                entryText.setText("");
+                            }
+                        })
+                        .setNegativeButton("No", null)
+                        .show();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    // TODO: Rename method, update argument and hook method into UI event
+    public void onButtonPressed(View view) {
+        if (mListener != null) {
+            mListener.onFragmentClick(view);
+        }
+    }
+
+    @Override
     public void onClick(View v) {
+        int position = entryText.getSelectionStart();
+        Calendar c = Calendar.getInstance();
+        String newText;
         switch (v.getId()){
             case R.id.tabButton:
-                int position = entryText.getSelectionStart();
-                String newText = String.valueOf(entryText.getText().insert(position, getString(R.string.tabCharacter)));
+                newText = String.valueOf(entryText.getText().insert(position, getString(R.string.tabCharacter)));
                 entryText.setText(newText);
                 entryText.setSelection(position+4);
                 break;
             case R.id.timeButton:
-
+                String date = "<"+c.get(Calendar.HOUR)+":"+c.get(Calendar.MINUTE)+":"+c.get(Calendar.SECOND)+">";
+                newText = String.valueOf(entryText.getText().insert(position, date));
+                entryText.setText(newText);
+                entryText.setSelection(position+date.length());
+                break;
+            case R.id.dateButton:
+                String time = "<"+c.get(Calendar.MONTH)+"-"+c.get(Calendar.DAY_OF_MONTH)+"-"+c.get(Calendar.YEAR)+">";
+                newText = String.valueOf(entryText.getText().insert(position, time));
+                entryText.setText(newText);
+                entryText.setSelection(position+time.length());
                 break;
             case R.id.scrollUpButton:
-
+                entryText.setSelection(0);
                 break;
             case R.id.scrollDownButton:
-
+                entryText.setSelection(entryText.getText().length());
                 break;
         }
     }

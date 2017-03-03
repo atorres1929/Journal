@@ -98,9 +98,10 @@
         "For example, position the FAB to one side of stream of a cards so the FAB won’t interfere "
         "when a user tries to pick up one of cards.\n"
     </string>
-    <string name="time">Time</string>
-    <string name="down">Down</string>
-    <string name="tab">Tab</string>
-    <string name="up">Up</string>
+    <string name="button_time">Time</string>
+    <string name="button_down">Down</string>
+    <string name="button_tab">Tab</string>
+    <string name="button_up">Up</string>
+    <string name="button_date">Date</string>
     <string name="tabCharacter">&#160;&#160;&#160;&#160;</string>
 </resources>
