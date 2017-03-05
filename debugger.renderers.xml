@@ -17,7 +17,7 @@
     <Renderer ID="ClassRenderer">
       <option name="NAME" value="unnamed" />
       <option name="ENABLED" value="true" />
-      <option name="SHOW_SYNTHETICS" value="true" />
+      <option name="SHOW_SYNTHETICS" value="false" />
       <option name="SHOW_VAL_FIELDS_AS_LOCAL_VARIABLES" value="true" />
       <option name="SHOW_STATIC" value="false" />
       <option name="SHOW_STATIC_FINAL" value="false" />
