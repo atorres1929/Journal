@@ -1,94 +1,189 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <TableRow android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <Button
-            android:text="@string/button_tab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/tabButton"
-            android:background="@color/colorButton"
-            android:layout_weight="1"
-            android:layout_alignParentLeft="true"
-            android:layout_centerHorizontal="false" />
+    android:layout_height="match_parent"
+    style="@style/AppTheme.NoActionBar">
 
-        <Button
-            android:text="@string/button_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/timeButton"
-            android:background="@color/colorButton"
-            tools:ignore="RelativeOverlap"
-            android:layout_weight="1"
-            android:layout_alignParentTop="true"
-            android:layout_toEndOf="@+id/tabButton"
-            android:layout_centerHorizontal="false" />
-
-        <Button
-            android:text="@string/button_date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/dateButton"
-            android:background="@color/colorButton"
-            tools:ignore="RelativeOverlap"
-            android:layout_weight="1"
-            android:layout_alignParentTop="true"
-            android:layout_toEndOf="@+id/timeButton"
-            android:layout_centerHorizontal="false" />
-
-        <Button
-            android:text="@string/button_down"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/scrollDownButton"
-            android:background="@color/colorButton"
-            android:layout_weight="1"
-            android:layout_alignParentTop="true"
-            android:layout_toEndOf="@+id/dateButton"
-            android:layout_centerHorizontal="false" />
-
-        <Button
-            android:text="@string/button_up"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/scrollUpButton"
-            android:background="@color/colorButton"
-            tools:ignore="RelativeOverlap"
-            android:layout_weight="1"
-            android:layout_alignParentTop="true"
-            android:layout_toEndOf="@+id/scrollDownButton"
-            android:layout_centerHorizontal="false" />
-    </TableRow>
-
-    <ScrollView
-        android:layout_width="match_parent"
-        tools:context="com.artifexiumgames.journal.NewEntryFragment"
-        android:background="@color/colorPrimary"
-        android:textAlignment="textStart"
-        android:scrollbarAlwaysDrawHorizontalTrack="false"
-        android:scrollbarAlwaysDrawVerticalTrack="true"
-        android:visibility="visible"
-        android:padding="0dp"
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appbar"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:layout_marginTop="45dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true">
+        android:layout_width="match_parent">
 
-        <!-- TODO: Update blank fragment layout -->
-
-        <MultiAutoCompleteTextView
-            android:text="@string/large_text"
+        <android.support.design.widget.CollapsingToolbarLayout
             android:layout_width="match_parent"
-            android:id="@+id/newEntryTextView"
-            android:gravity="top|start"
-            android:textColor="@android:color/white"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_below="@+id/tabButton"
-            android:layout_centerHorizontal="true" />
-    </ScrollView>
+            app:toolbarId="@+id/toolbar"
+            app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
+            app:contentScrim="?attr/colorPrimary">
 
-</RelativeLayout>
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" >
+
+                    <TableLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1">
+
+                        <TableRow
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+
+                            <Button
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/tabButton"
+                                android:background="@drawable/custom_button_bordered"
+                                android:layout_weight="1"
+                                android:textColor="@android:color/white"
+                                android:text="@string/button_tab" />
+
+                            <Button
+                                android:text="@string/button_time"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/timeButton"
+                                android:background="@drawable/custom_button_bordered"
+                                tools:ignore="RelativeOverlap"
+                                android:layout_weight="1"
+                                android:textColor="@android:color/white" />
+
+                            <Button
+                                android:text="@string/button_date"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/dateButton"
+                                android:background="@drawable/custom_button_bordered"
+                                tools:ignore="RelativeOverlap"
+                                android:layout_weight="1"
+                                android:textColor="@android:color/white" />
+
+                            <Button
+                                android:text="@string/button_down"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/scrollDownButton"
+                                android:background="@drawable/custom_button_bordered"
+                                android:layout_weight="1"
+                                android:textColor="@android:color/white" />
+
+                            <Button
+                                android:text="@string/button_up"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/scrollUpButton"
+                                android:background="@drawable/custom_button_bordered"
+                                tools:ignore="RelativeOverlap"
+                                android:layout_weight="1"
+                                android:textColor="@android:color/white" />
+
+                        </TableRow>
+
+                        <TableRow
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center">
+
+                            <ToggleButton
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/boldToggleButton"
+                                android:background="@drawable/custom_button_bordered"
+                                android:text="@string/button_bold"
+                                android:textColor="@android:color/white"
+                                android:textOff="@string/button_bold"
+                                android:textOn="@string/button_bold"
+                                android:layout_weight="1"
+                                android:textStyle="bold"
+                                android:fontFamily="serif" />
+
+                            <ToggleButton
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/italicToggleButton"
+                                android:background="@drawable/custom_button_bordered"
+                                android:text="@string/button_bold"
+                                android:textColor="@android:color/white"
+                                android:textOff="@string/button_italic"
+                                android:textOn="@string/button_italic"
+                                android:layout_weight="1"
+                                android:textStyle="normal|italic"
+                                android:fontFamily="serif" />
+
+                            <ToggleButton
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/underlineToggleButton"
+                                android:background="@drawable/custom_button_bordered"
+                                android:textColor="@android:color/white"
+                                android:textOff="@string/button_underline"
+                                android:textOn="@string/button_underline"
+                                android:layout_weight="1"
+                                android:fontFamily="serif" />
+
+                        </TableRow>
+
+                    </TableLayout>
+                </TableRow>
+
+            </TableLayout>
+
+        </android.support.design.widget.CollapsingToolbarLayout>
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="android.support.design.widget.AppBarLayout$ScrollingViewBehavior">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ScrollView
+                android:layout_width="match_parent"
+                tools:context="com.artifexiumgames.journal.NewEntryFragment"
+                android:background="@color/colorPrimary"
+                android:textAlignment="textStart"
+                android:scrollbarAlwaysDrawHorizontalTrack="false"
+                android:scrollbarAlwaysDrawVerticalTrack="true"
+                android:visibility="visible"
+                android:padding="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true">
+
+                <!-- TODO: Update blank fragment layout -->
+
+                <MultiAutoCompleteTextView
+                    android:text="@string/large_text"
+                    android:layout_width="match_parent"
+                    android:id="@+id/newEntryTextView"
+                    android:gravity="top|start"
+                    android:textColor="@android:color/white"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_below="@+id/tabButton"
+                    android:layout_centerHorizontal="true" />
+            </ScrollView>
+
+        </RelativeLayout>
+    </android.support.v4.widget.NestedScrollView>
+
+    <android.support.design.widget.FloatingActionButton
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        app:layout_anchor="@+id/appbar"
+        app:layout_anchorGravity="bottom|right"
+        android:src="@android:drawable/ic_menu_save"
+        android:layout_marginRight="16dp"
+        android:clickable="true"
+        app:fabSize="mini"
+        android:layout_gravity="bottom|left" />
+</android.support.design.widget.CoordinatorLayout>

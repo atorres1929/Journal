@@ -5,15 +5,15 @@
         <item
             android:icon="@mipmap/ic_new_entry"
             android:id="@+id/menu_new_entry"
-            android:title="New Entry" />
+            android:title="@string/nav_action_new_entry" />
         <item
             android:id="@+id/menu_past_entries"
             android:icon="@mipmap/ic_view_past"
-            android:title="Past Entries" />
+            android:title="@string/nav_action_view_past_entry" />
         <item
             android:id="@+id/menu_view_graph"
             android:icon="@mipmap/ic_graph"
-            android:title="View Graph" />
+            android:title="@string/nav_action_view_graphs" />
     </group>
 
 
