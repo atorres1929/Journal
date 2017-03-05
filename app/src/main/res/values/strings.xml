@@ -5,9 +5,14 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
+    <string name="nav_action_new_entry">New Entry</string>
+    <string name="nav_action_view_past_entry">Past Entries</string>
+    <string name="nav_action_view_graphs">View Graphs</string>
+
     <string name="action_settings">Settings</string>
     <string name="action_save_entry">Save Entry</string>
     <string name="action_clear_entry">Clear Entry</string>
+    <string name="action_find_text">Find Text</string>
 
     <string name="large_text">
         "Material is the metaphor.\n"
@@ -103,5 +108,9 @@
     <string name="button_tab">Tab</string>
     <string name="button_up">Up</string>
     <string name="button_date">Date</string>
+    <string name="button_bold">B</string>
+    <string name="button_italic">I</string>
+    <string name="button_underline"><u>U</u></string>
     <string name="tabCharacter">&#160;&#160;&#160;&#160;</string>
+    <string name="bold"></string>
 </resources>
