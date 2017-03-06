@@ -6,20 +6,16 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.NotificationCompat;
+import android.support.v4.text.TextUtilsCompat;
 import android.support.v7.app.AlertDialog;
 import android.text.Editable;
+import android.text.ParcelableSpan;
 import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
-import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.style.CharacterStyle;
 import android.text.style.StyleSpan;
-import android.text.style.TypefaceSpan;
 import android.text.style.UnderlineSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -30,7 +26,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ToggleButton;
 
-import java.lang.reflect.Type;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -43,7 +39,7 @@ import java.util.Calendar;
  * Use the {@link NewEntryFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class NewEntryFragment extends Fragment implements View.OnClickListener, TextWatcher{
+public class NewEntryFragment extends Fragment implements View.OnClickListener, TextWatcher, RichEditText.OnSelectionChangeListener{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -61,8 +57,7 @@ public class NewEntryFragment extends Fragment implements View.OnClickListener, 
     private ToggleButton boldButton;
     private ToggleButton italicButton;
     private ToggleButton underlineButton;
-    private EditText entryText;
-    private ArrayList<CharacterStyle> textStyle;
+    private RichEditText entryText;
 
     private NewEntryFragmentListner mListener;
 
@@ -102,7 +97,6 @@ public class NewEntryFragment extends Fragment implements View.OnClickListener, 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_new_entry, container, false);
-
         tabButton = (Button) v.findViewById(R.id.tabButton);
         timeButton = (Button) v.findViewById(R.id.timeButton);
         dateButton = (Button) v.findViewById(R.id.dateButton);
@@ -114,8 +108,7 @@ public class NewEntryFragment extends Fragment implements View.OnClickListener, 
         underlineButton = (ToggleButton) v.findViewById(R.id.underlineToggleButton);
         underlineButton.setPaintFlags(Paint.UNDERLINE_TEXT_FLAG);
 
-        entryText = (EditText) v.findViewById(R.id.newEntryTextView);
-        textStyle = new ArrayList<>();
+        entryText = (RichEditText) v.findViewById(R.id.newEntryTextView);
 
         tabButton.setOnClickListener(this);
         timeButton.setOnClickListener(this);
@@ -128,6 +121,7 @@ public class NewEntryFragment extends Fragment implements View.OnClickListener, 
         underlineButton.setOnClickListener(this);
 
         entryText.addTextChangedListener(this);
+        entryText.addOnSelectionChangeListener(this);
 
 
         return v;
@@ -163,7 +157,6 @@ public class NewEntryFragment extends Fragment implements View.OnClickListener, 
             case R.id.action_save_entry:
                 //TODO: save encrypted journal log to memory
                 return true;
-
             case R.id.action_clear_entry:
                 new AlertDialog.Builder(getContext(), android.R.style.Theme_Material_Dialog_Alert)
                         .setIcon(android.R.drawable.ic_dialog_alert)
@@ -211,17 +204,21 @@ public class NewEntryFragment extends Fragment implements View.OnClickListener, 
             case R.id.italicToggleButton:
             case R.id.underlineToggleButton:
                 updateTextStyle();
-                if (entryText.getSelectionStart() != entryText.getSelectionEnd())
-                    applyTextToSelection();
                 break;
         }
     }
 
-    private void tabButtonAction(){
-        int position = entryText.getSelectionStart();
+    private void tabButtonAction() {
+        int selectionStart = entryText.getSelectionStart();
+        int selectionEnd = entryText.getSelectionEnd();
         String newText = entryText.getText().insert(entryText.getSelectionStart(), getString(R.string.tabCharacter)).toString();
         entryText.setText(newText);
-        entryText.setSelection(position+4);
+        if (selectionStart != selectionEnd) {
+            entryText.setSelection(selectionStart + 4, selectionEnd);
+        }
+        else{
+            entryText.setSelection(selectionStart);
+        }
     }
 
     private void timeButtonAction(){
@@ -248,44 +245,53 @@ public class NewEntryFragment extends Fragment implements View.OnClickListener, 
         entryText.setSelection(entryText.getText().length());
     }
 
-    private void applyTextToSelection(){
-        SpannableStringBuilder styledText = new SpannableStringBuilder(entryText.getText());
-        styledText.setSpan(textStyle, entryText.getSelectionStart(), entryText.getSelectionEnd(), 0);
-        entryText.setText(styledText);
-        entryText.setSelection(entryText.getSelectionEnd());
-    }
-
-    private void updateTextStyle(){
+    private void updateTextStyle() {
+        int start = entryText.getSelectionStart();
+        int end = entryText.getSelectionEnd();
         if (boldButton.isChecked()){
-            textStyle.add(new StyleSpan(Typeface.BOLD));
-        }
-        else{
-            for (CharacterStyle characterStyle: textStyle){
-                if (((StyleSpan) characterStyle).getStyle() == Typeface.BOLD) {
-                    textStyle.remove(characterStyle);
-                }
+            if (start != end){
+                entryText.getText().setSpan(new StyleSpan(Typeface.BOLD), start, end, 0);
             }
+        }
+        else if (!boldButton.isChecked()){
+            removeSpansWithinSelection(Typeface.BOLD);
         }
 
         if (italicButton.isChecked()){
-            textStyle.add(new StyleSpan(Typeface.ITALIC));
-        }
-        else{
-            for (CharacterStyle characterStyle: textStyle){
-                if (((StyleSpan) characterStyle).getStyle() == Typeface.ITALIC) {
-                    textStyle.remove(characterStyle);
-                }
+            if (start != end){
+                entryText.getText().setSpan(new StyleSpan(Typeface.ITALIC), start, end, 0);
             }
+        }
+        else if (!italicButton.isChecked()){
+            removeSpansWithinSelection(Typeface.ITALIC);
         }
 
         if (underlineButton.isChecked()){
-            textStyle.add(new UnderlineSpan());
+            if (start != end){
+                entryText.getText().setSpan(new UnderlineSpan(), start, end, 0);
+            }
         }
-        else{
-            for (CharacterStyle characterStyle: textStyle){
-                if (characterStyle instanceof UnderlineSpan) {
-                    textStyle.remove(characterStyle);
-                }
+        else if (!underlineButton.isChecked()){
+            removeSpansWithinSelection(UnderlineSpan.class);
+        }
+    }
+
+    private void removeSpansWithinSelection(int spanId) {
+        int start = entryText.getSelectionStart();
+        int end = entryText.getSelectionEnd();
+        for (StyleSpan span: entryText.getText().getSpans(start, end, StyleSpan.class)) {
+            if (span.getStyle() == spanId) {
+                entryText.getText().removeSpan(span);
+            }
+        }
+    }
+
+    private void removeSpansWithinSelection(Class c) {
+        int start = entryText.getSelectionStart();
+        int end = entryText.getSelectionEnd();
+        for (ParcelableSpan span: entryText.getText().getSpans(start, end, ParcelableSpan.class)) {
+            if (span.getClass().equals(c)) {
+                entryText.getText().removeSpan(span);
             }
         }
     }
@@ -295,27 +301,64 @@ public class NewEntryFragment extends Fragment implements View.OnClickListener, 
 
     }
 
-    private boolean changedText = false;
+
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
-        if (changedText) {
-            changedText = false;
-            return;
+        if (boldButton.isChecked()) {
+            entryText.getText().setSpan(new StyleSpan(Typeface.BOLD), start, start + count, 0);
         }
-        else {
-            changedText = true;
-            SpannableStringBuilder styledText = new SpannableStringBuilder(s);
-            for (CharacterStyle style : textStyle) {
-                styledText.setSpan(style, start, start + count, 0);
-                entryText.setText(styledText);
-                entryText.setSelection(entryText.getSelectionEnd());
-            }
+        if (italicButton.isChecked()){
+            entryText.getText().setSpan(new StyleSpan(Typeface.ITALIC), start, start + count, 0);
+        }
+        if (underlineButton.isChecked()){
+            entryText.getText().setSpan(new UnderlineSpan(), start, start + count, 0);
         }
     }
 
     @Override
     public void afterTextChanged(Editable s) {
 
+    }
+
+    @Override
+    public void onSelectionChange(int start, int end) {
+        boolean isBold = false;
+        boolean isItalic = false;
+        boolean isUnderlined = false;
+        for (ParcelableSpan span: entryText.getText().getSpans(start, end, ParcelableSpan.class)){
+            if (span instanceof StyleSpan){
+                if (((StyleSpan) span).getStyle() == Typeface.BOLD){
+                    isBold = true;
+                }
+                else if (((StyleSpan) span).getStyle() == Typeface.ITALIC) {
+                    isItalic = true;
+                }
+            }
+
+            if (span instanceof UnderlineSpan){
+                isUnderlined = true;
+            }
+        }
+        if (isBold){
+            boldButton.setChecked(true);
+        }
+        else{
+            boldButton.setChecked(false);
+        }
+
+        if (isItalic){
+            italicButton.setChecked(true);
+        }
+        else{
+            italicButton.setChecked(false);
+        }
+
+        if (isUnderlined){
+            underlineButton.setChecked(true);
+        }
+        else{
+            underlineButton.setChecked(false);
+        }
     }
 
     /**
@@ -332,4 +375,5 @@ public class NewEntryFragment extends Fragment implements View.OnClickListener, 
         // TODO: Update argument type and name
         void onFragmentClick(View view);
     }
+
 }

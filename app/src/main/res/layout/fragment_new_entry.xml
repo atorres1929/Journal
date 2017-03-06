@@ -161,16 +161,16 @@
 
                 <!-- TODO: Update blank fragment layout -->
 
-                <MultiAutoCompleteTextView
-                    android:text="@string/large_text"
-                    android:layout_width="match_parent"
+                <com.artifexiumgames.journal.RichEditText
                     android:id="@+id/newEntryTextView"
-                    android:gravity="top|start"
-                    android:textColor="@android:color/white"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_below="@+id/tabButton"
-                    android:layout_centerHorizontal="true" />
+                    android:fontFamily="sans-serif"
+                    android:gravity="top|start"
+                    android:inputType="textMultiLine"
+                    android:text="@string/large_text"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp" />
             </ScrollView>
 
         </RelativeLayout>
