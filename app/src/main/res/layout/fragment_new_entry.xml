@@ -147,7 +147,7 @@
 
             <ScrollView
                 android:layout_width="match_parent"
-                tools:context="com.artifexiumgames.journal.NewEntryFragment"
+                tools:context="com.artifexiumgames.journal.Fragment.NewEntryFragment"
                 android:background="@color/colorPrimary"
                 android:textAlignment="textStart"
                 android:scrollbarAlwaysDrawHorizontalTrack="false"
@@ -161,7 +161,7 @@
 
                 <!-- TODO: Update blank fragment layout -->
 
-                <com.artifexiumgames.journal.RichEditText
+                <com.artifexiumgames.journal.CustomTextEditor.RichEditText
                     android:id="@+id/newEntryTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

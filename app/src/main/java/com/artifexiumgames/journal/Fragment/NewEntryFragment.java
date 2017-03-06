@@ -1,4 +1,4 @@
-package com.artifexiumgames.journal;
+package com.artifexiumgames.journal.Fragment;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -6,14 +6,10 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.text.TextUtilsCompat;
 import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.ParcelableSpan;
-import android.text.Spannable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.text.style.CharacterStyle;
 import android.text.style.StyleSpan;
 import android.text.style.UnderlineSpan;
 import android.view.LayoutInflater;
@@ -23,11 +19,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ToggleButton;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
+import com.artifexiumgames.journal.CustomTextEditor.RichEditText;
+import com.artifexiumgames.journal.R;
+
 import java.util.Calendar;
 
 
@@ -39,7 +35,7 @@ import java.util.Calendar;
  * Use the {@link NewEntryFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class NewEntryFragment extends Fragment implements View.OnClickListener, TextWatcher, RichEditText.OnSelectionChangeListener{
+public class NewEntryFragment extends Fragment implements View.OnClickListener{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -109,6 +105,7 @@ public class NewEntryFragment extends Fragment implements View.OnClickListener, 
         underlineButton.setPaintFlags(Paint.UNDERLINE_TEXT_FLAG);
 
         entryText = (RichEditText) v.findViewById(R.id.newEntryTextView);
+        entryText.setAllButtons(boldButton, italicButton, underlineButton);
 
         tabButton.setOnClickListener(this);
         timeButton.setOnClickListener(this);
@@ -119,10 +116,6 @@ public class NewEntryFragment extends Fragment implements View.OnClickListener, 
         boldButton.setOnClickListener(this);
         italicButton.setOnClickListener(this);
         underlineButton.setOnClickListener(this);
-
-        entryText.addTextChangedListener(this);
-        entryText.addOnSelectionChangeListener(this);
-
 
         return v;
 
@@ -198,13 +191,6 @@ public class NewEntryFragment extends Fragment implements View.OnClickListener, 
             case R.id.scrollDownButton:
                 downButtonAction();
                 break;
-
-            //STYLE BUTTONS
-            case R.id.boldToggleButton:
-            case R.id.italicToggleButton:
-            case R.id.underlineToggleButton:
-                updateTextStyle();
-                break;
         }
     }
 
@@ -245,121 +231,6 @@ public class NewEntryFragment extends Fragment implements View.OnClickListener, 
         entryText.setSelection(entryText.getText().length());
     }
 
-    private void updateTextStyle() {
-        int start = entryText.getSelectionStart();
-        int end = entryText.getSelectionEnd();
-        if (boldButton.isChecked()){
-            if (start != end){
-                entryText.getText().setSpan(new StyleSpan(Typeface.BOLD), start, end, 0);
-            }
-        }
-        else if (!boldButton.isChecked()){
-            removeSpansWithinSelection(Typeface.BOLD);
-        }
-
-        if (italicButton.isChecked()){
-            if (start != end){
-                entryText.getText().setSpan(new StyleSpan(Typeface.ITALIC), start, end, 0);
-            }
-        }
-        else if (!italicButton.isChecked()){
-            removeSpansWithinSelection(Typeface.ITALIC);
-        }
-
-        if (underlineButton.isChecked()){
-            if (start != end){
-                entryText.getText().setSpan(new UnderlineSpan(), start, end, 0);
-            }
-        }
-        else if (!underlineButton.isChecked()){
-            removeSpansWithinSelection(UnderlineSpan.class);
-        }
-    }
-
-    private void removeSpansWithinSelection(int spanId) {
-        int start = entryText.getSelectionStart();
-        int end = entryText.getSelectionEnd();
-        for (StyleSpan span: entryText.getText().getSpans(start, end, StyleSpan.class)) {
-            if (span.getStyle() == spanId) {
-                entryText.getText().removeSpan(span);
-            }
-        }
-    }
-
-    private void removeSpansWithinSelection(Class c) {
-        int start = entryText.getSelectionStart();
-        int end = entryText.getSelectionEnd();
-        for (ParcelableSpan span: entryText.getText().getSpans(start, end, ParcelableSpan.class)) {
-            if (span.getClass().equals(c)) {
-                entryText.getText().removeSpan(span);
-            }
-        }
-    }
-
-    @Override
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-    }
-
-
-    @Override
-    public void onTextChanged(CharSequence s, int start, int before, int count) {
-        if (boldButton.isChecked()) {
-            entryText.getText().setSpan(new StyleSpan(Typeface.BOLD), start, start + count, 0);
-        }
-        if (italicButton.isChecked()){
-            entryText.getText().setSpan(new StyleSpan(Typeface.ITALIC), start, start + count, 0);
-        }
-        if (underlineButton.isChecked()){
-            entryText.getText().setSpan(new UnderlineSpan(), start, start + count, 0);
-        }
-    }
-
-    @Override
-    public void afterTextChanged(Editable s) {
-
-    }
-
-    @Override
-    public void onSelectionChange(int start, int end) {
-        boolean isBold = false;
-        boolean isItalic = false;
-        boolean isUnderlined = false;
-        for (ParcelableSpan span: entryText.getText().getSpans(start, end, ParcelableSpan.class)){
-            if (span instanceof StyleSpan){
-                if (((StyleSpan) span).getStyle() == Typeface.BOLD){
-                    isBold = true;
-                }
-                else if (((StyleSpan) span).getStyle() == Typeface.ITALIC) {
-                    isItalic = true;
-                }
-            }
-
-            if (span instanceof UnderlineSpan){
-                isUnderlined = true;
-            }
-        }
-        if (isBold){
-            boldButton.setChecked(true);
-        }
-        else{
-            boldButton.setChecked(false);
-        }
-
-        if (isItalic){
-            italicButton.setChecked(true);
-        }
-        else{
-            italicButton.setChecked(false);
-        }
-
-        if (isUnderlined){
-            underlineButton.setChecked(true);
-        }
-        else{
-            underlineButton.setChecked(false);
-        }
-    }
 
     /**
      * This interface must be implemented by activities that contain this

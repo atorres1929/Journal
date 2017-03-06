@@ -1,4 +1,4 @@
-package com.artifexiumgames.journal;
+package com.artifexiumgames.journal.Activity;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -11,6 +11,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+
+import com.artifexiumgames.journal.Fragment.NewEntryFragment;
+import com.artifexiumgames.journal.R;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, NewEntryFragment.NewEntryFragmentListner, View.OnClickListener {
 
