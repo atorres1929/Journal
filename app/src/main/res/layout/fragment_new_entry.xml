@@ -165,9 +165,10 @@
                     android:id="@+id/newEntryTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:autoText="false"
                     android:fontFamily="sans-serif"
                     android:gravity="top|start"
-                    android:inputType="textMultiLine"
+                    android:inputType="textCapSentences|textAutoCorrect|textAutoComplete|textMultiLine"
                     android:text="@string/large_text"
                     android:textColor="@android:color/white"
                     android:textSize="20sp" />

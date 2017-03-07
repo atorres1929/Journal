@@ -320,6 +320,11 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
         void onSelectionChange(int start, int end);
     }
 
+    /**
+     * Necessary to differentiate between the underlining done by the SpellChecker and the
+     * underlining done by the user
+     * @see #onSelectionChanged(int, int) 
+     */
     @SuppressLint("ParcelCreator")
     private class MyUnderlineSpan extends UnderlineSpan {
 
