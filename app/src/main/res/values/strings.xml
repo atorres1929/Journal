@@ -110,7 +110,8 @@
     <string name="button_date">Date</string>
     <string name="button_bold">B</string>
     <string name="button_italic">I</string>
-    <string name="button_underline"><u>U</u></string>
+    <string name="button_underline">U</string>
+    <string name="button_strikethrough">&#160;S&#160;</string>
     <string name="tabCharacter">&#160;&#160;&#160;&#160;</string>
     <string name="bold"></string>
 </resources>

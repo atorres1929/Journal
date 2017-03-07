@@ -4,13 +4,21 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Typeface;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
 import android.text.ParcelableSpan;
+import android.text.Spanned;
 import android.text.TextWatcher;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.StrikethroughSpan;
 import android.text.style.StyleSpan;
+import android.text.style.SubscriptSpan;
+import android.text.style.SuperscriptSpan;
 import android.text.style.UnderlineSpan;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -27,7 +35,7 @@ import com.artifexiumgames.journal.R;
  * <p>
  *     Implementation Features Include:
  *     <ul>
- *         <li>Automatic button functionality: reference buttons to the class with {@link #setAllButtons(ToggleButton, ToggleButton, ToggleButton)}</li>
+ *         <li>Automatic button functionality: reference buttons to the editor with setAllButtons()</li>
  *         <li>Selection changes can now be listened for with {@link OnSelectionChangeListener}</li>
  *     </ul>
  * </p>
@@ -58,12 +66,12 @@ import com.artifexiumgames.journal.R;
 public class RichEditText extends AppCompatEditText implements TextWatcher, View.OnClickListener {
 
     protected OnSelectionChangeListener onSelectionChangeListener;
-    protected boolean isSelectionBold;
-    protected boolean isSelectionItalic;
-    protected boolean isSelectionUnderlined;
     protected ToggleButton boldButton;
     protected ToggleButton italicButton;
     protected ToggleButton underlineButton;
+    protected ToggleButton strikeThroughButton;
+    protected ToggleButton subscriptButton;
+    protected ToggleButton superscriptButton;
 
     public RichEditText(Context context) {
         super(context);
@@ -103,42 +111,37 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
             onSelectionChangeListener.onSelectionChange(selStart, selEnd);
         }
 
-        boolean bold = false;
-        boolean italic = false;
-        boolean underlined = false;
+        boolean isSelectionBold = false;
+        boolean isSelectionItalic = false;
+        boolean isSelectionUnderlined = false;
+        boolean isSelectionStriked = false;
+        boolean isSelectionSubscripted = false;
+        boolean isSelectionSuperscripted = false;
         for (ParcelableSpan span: getText().getSpans(selStart, selEnd, ParcelableSpan.class)){
             if (span instanceof StyleSpan){
                 if (((StyleSpan) span).getStyle() == Typeface.BOLD){
-                    bold = true;
+                    isSelectionBold = true;
                 }
                 else if (((StyleSpan) span).getStyle() == Typeface.ITALIC) {
-                    italic = true;
+                    isSelectionItalic = true;
                 }
             }
 
             if (span instanceof MyUnderlineSpan){
-                underlined = true;
+                isSelectionUnderlined = true;
             }
-        }
-        if (bold){
-            isSelectionBold = true;
-        }
-        else{
-            isSelectionBold = false;
-        }
 
-        if (italic){
-            isSelectionItalic = true;
-        }
-        else{
-            isSelectionItalic = false;
-        }
+            if (span instanceof StrikethroughSpan){
+                isSelectionStriked = true;
+            }
 
-        if (underlined){
-            isSelectionUnderlined = true;
-        }
-        else{
-            isSelectionUnderlined = false;
+            if (span instanceof SubscriptSpan){
+                isSelectionSubscripted = true;
+            }
+
+            if (span instanceof SuperscriptSpan){
+                isSelectionSuperscripted = true;
+            }
         }
 
         if (boldButton != null) {
@@ -149,6 +152,15 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
         }
         if (underlineButton != null) {
             underlineButton.setChecked(isSelectionUnderlined);
+        }
+        if (strikeThroughButton != null) {
+            strikeThroughButton.setChecked(isSelectionStriked);
+        }
+        if (subscriptButton != null) {
+            subscriptButton.setChecked(isSelectionSubscripted);
+        }
+        if (superscriptButton != null) {
+            superscriptButton.setChecked(isSelectionSuperscripted);
         }
 
     }
@@ -169,13 +181,24 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
     public void onTextChanged(CharSequence s, int start, int before, int count) {
 
         if (boldButton != null && boldButton.isChecked()) {
-            getText().setSpan(new StyleSpan(Typeface.BOLD), start, start + count, 0);
+            getText().setSpan(new StyleSpan(Typeface.BOLD), start, start + count, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         if (italicButton != null && italicButton.isChecked()){
-            getText().setSpan(new StyleSpan(Typeface.ITALIC), start, start + count, 0);
+            getText().setSpan(new StyleSpan(Typeface.ITALIC), start, start + count, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         if (underlineButton != null && underlineButton.isChecked()){
-            getText().setSpan(new MyUnderlineSpan(), start, start + count, 0);
+            getText().setSpan(new MyUnderlineSpan(), start, start + count, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        if (strikeThroughButton != null && strikeThroughButton.isChecked()){
+            getText().setSpan(new StrikethroughSpan(), start, start + count, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        if (subscriptButton != null && subscriptButton.isChecked()){
+            getText().setSpan(new SubscriptSpan(), start, start + count, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            getText().setSpan(new RelativeSizeSpan(0.5f), start, start + count, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        if (superscriptButton != null && superscriptButton.isChecked()){
+            getText().setSpan(new SuperscriptSpan(), start, start + count, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            getText().setSpan(new RelativeSizeSpan(0.5f), start, start + count, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
     }
 
@@ -186,12 +209,9 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.boldToggleButton:
-            case R.id.italicToggleButton:
-            case R.id.underlineToggleButton:
-                updateTextStyle();
-                break;
+        int id = v.getId();
+        if (id == boldButton.getId() || id == italicButton.getId()|| id == underlineButton.getId()){
+            updateTextStyle();
         }
     }
 
@@ -216,31 +236,46 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
     protected void updateTextStyle() {
         int start = this.getSelectionStart();
         int end = this.getSelectionEnd();
-        if (boldButton.isChecked()){
-            if (start != end){
-                this.getText().setSpan(new StyleSpan(Typeface.BOLD), start, end, 0);
-            }
+        if (boldButton.isChecked() && start != end){
+            this.getText().setSpan(new StyleSpan(Typeface.BOLD), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         else if (!boldButton.isChecked()){
             removeSpansWithinSelection(Typeface.BOLD);
         }
 
-        if (italicButton.isChecked()){
-            if (start != end){
-                this.getText().setSpan(new StyleSpan(Typeface.ITALIC), start, end, 0);
-            }
+        if (italicButton.isChecked() && start != end){
+            this.getText().setSpan(new StyleSpan(Typeface.ITALIC), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         else if (!italicButton.isChecked()){
             removeSpansWithinSelection(Typeface.ITALIC);
         }
 
-        if (underlineButton.isChecked()){
-            if (start != end){
-                this.getText().setSpan(new MyUnderlineSpan(), start, end, 0);
-            }
+        if (underlineButton.isChecked() && start != end){
+            this.getText().setSpan(new MyUnderlineSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         else if (!underlineButton.isChecked()){
             removeSpansWithinSelection(MyUnderlineSpan.class);
+        }
+
+        if (strikeThroughButton.isChecked() && start != end){
+            this.getText().setSpan(new StrikethroughSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        else if (!strikeThroughButton.isChecked()){
+            removeSpansWithinSelection(StrikethroughSpan.class);
+        }
+
+        if (subscriptButton.isChecked() && start != end){
+            this.getText().setSpan(new SubscriptSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        else if (!subscriptButton.isChecked()){
+            removeSpansWithinSelection(SubscriptSpan.class, RelativeSizeSpan.class);
+        }
+
+        if (superscriptButton.isChecked() && start != end){
+            this.getText().setSpan(new SuperscriptSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        else if (!superscriptButton.isChecked()){
+            removeSpansWithinSelection(SuperscriptSpan.class, RelativeSizeSpan.class);
         }
     }
 
@@ -260,15 +295,17 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
 
     /**
      * Removes the spans within the selection matching the class given.
-     * @param c Not all spans are referenced by a {@link Typeface} Id
+     * @param classes Not all spans are referenced by a {@link Typeface} Id
      * therefore, they are found by comparing their class to the class passed by this method
      */
-    protected void removeSpansWithinSelection(Class c) {
+    protected void removeSpansWithinSelection(Class... classes) {
         int start = this.getSelectionStart();
         int end = this.getSelectionEnd();
         for (ParcelableSpan span: this.getText().getSpans(start, end, ParcelableSpan.class)) {
-            if (span.getClass().equals(c)) {
-                this.getText().removeSpan(span);
+            for (Class c: classes) {
+                if (span.getClass().equals(c)) {
+                    this.getText().removeSpan(span);
+                }
             }
         }
     }
@@ -280,29 +317,57 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
      * <Strong>To add your own functionality to the buttons when clicked:</Strong> simply call
      * {@link #onClick(View)} within your own OnClickListener's method.
      */
-    public void setAllButtons(ToggleButton boldButton, ToggleButton italicButton, ToggleButton underlineButton){
-        this.boldButton = boldButton;
-        this.italicButton = italicButton;
-        this.underlineButton = underlineButton;
-        this.boldButton.setOnClickListener(this);
-        this.italicButton.setOnClickListener(this);
-        this.underlineButton.setOnClickListener(this);
+
+    public void setAllButtons(ToggleButton boldButton, ToggleButton italicButton, ToggleButton underlineButton,
+                              ToggleButton strikeThroughButton, ToggleButton subscriptButton, ToggleButton superscriptButton){
+        try {
+            this.boldButton = boldButton;
+            this.italicButton = italicButton;
+            this.underlineButton = underlineButton;
+            this.strikeThroughButton = strikeThroughButton;
+            this.subscriptButton = subscriptButton;
+            this.superscriptButton = superscriptButton;
+            this.boldButton.setOnClickListener(this);
+            this.italicButton.setOnClickListener(this);
+            this.underlineButton.setOnClickListener(this);
+            this.strikeThroughButton.setOnClickListener(this);
+            this.subscriptButton.setOnClickListener(this);
+            this.superscriptButton.setOnClickListener(this);
+        }catch(NullPointerException ex){
+            Log.e("RichEditText", "Remember, you can set buttons individually instead of setting them all at the same time", ex);
+        }
     }
 
     public void setBoldButton(ToggleButton button){
-        boldButton = button;
+        this.boldButton = button;
         this.boldButton.setOnClickListener(this);
     }
 
-    public void setItalicButton(ToggleButton button){
-        italicButton = button;
+    public void setItalicButton(@NonNull ToggleButton button){
+        this.italicButton = button;
         this.italicButton.setOnClickListener(this);
     }
 
-    public void setUnderlineButton(ToggleButton button){
-        underlineButton = button;
+    public void setUnderlineButton(@NonNull ToggleButton button){
+        this.underlineButton = button;
         this.underlineButton.setOnClickListener(this);
     }
+
+    public void setStrikeThroughButton(@NonNull ToggleButton button){
+        this.strikeThroughButton = button;
+        this.strikeThroughButton.setOnClickListener(this);
+    }
+
+    public void setSubscriptButton(@NonNull ToggleButton button){
+        this.subscriptButton = button;
+        this.subscriptButton.setOnClickListener(this);
+    }
+
+    public void setSuperscriptButton(@NonNull ToggleButton button){
+        this.superscriptButton = button;
+        this.superscriptButton.setOnClickListener(this);
+    }
+
 
     /**
      * Adds a SelectionChangeListener to this editor
@@ -323,7 +388,7 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
     /**
      * Necessary to differentiate between the underlining done by the SpellChecker and the
      * underlining done by the user
-     * @see #onSelectionChanged(int, int) 
+     * @see #onSelectionChanged(int, int)
      */
     @SuppressLint("ParcelCreator")
     private class MyUnderlineSpan extends UnderlineSpan {
