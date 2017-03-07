@@ -70,8 +70,8 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
     protected ToggleButton italicButton;
     protected ToggleButton underlineButton;
     protected ToggleButton strikeThroughButton;
-    protected ToggleButton subscriptButton;
-    protected ToggleButton superscriptButton;
+    protected Button subscriptButton;
+    protected Button superscriptButton;
 
     public RichEditText(Context context) {
         super(context);
@@ -156,12 +156,6 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
         if (strikeThroughButton != null) {
             strikeThroughButton.setChecked(isSelectionStriked);
         }
-        if (subscriptButton != null) {
-            subscriptButton.setChecked(isSelectionSubscripted);
-        }
-        if (superscriptButton != null) {
-            superscriptButton.setChecked(isSelectionSuperscripted);
-        }
 
     }
 
@@ -179,7 +173,6 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
      */
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
-
         if (boldButton != null && boldButton.isChecked()) {
             getText().setSpan(new StyleSpan(Typeface.BOLD), start, start + count, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
@@ -191,14 +184,6 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
         }
         if (strikeThroughButton != null && strikeThroughButton.isChecked()){
             getText().setSpan(new StrikethroughSpan(), start, start + count, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }
-        if (subscriptButton != null && subscriptButton.isChecked()){
-            getText().setSpan(new SubscriptSpan(), start, start + count, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            getText().setSpan(new RelativeSizeSpan(0.5f), start, start + count, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }
-        if (superscriptButton != null && superscriptButton.isChecked()){
-            getText().setSpan(new SuperscriptSpan(), start, start + count, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            getText().setSpan(new RelativeSizeSpan(0.5f), start, start + count, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
     }
 
@@ -212,6 +197,12 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
         int id = v.getId();
         if (id == boldButton.getId() || id == italicButton.getId()|| id == underlineButton.getId()){
             updateTextStyle();
+        }
+        if (id == subscriptButton.getId()){
+            //TODO add subscript button dialog
+        }
+        if (id == superscriptButton.getId()){
+            //TODO add superscript button dialog
         }
     }
 
@@ -240,14 +231,14 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
             this.getText().setSpan(new StyleSpan(Typeface.BOLD), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         else if (!boldButton.isChecked()){
-            removeSpansWithinSelection(Typeface.BOLD);
+            removeSpansWithinSelection(getSelectionStart(), getSelectionEnd(), Typeface.BOLD);
         }
 
         if (italicButton.isChecked() && start != end){
             this.getText().setSpan(new StyleSpan(Typeface.ITALIC), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         else if (!italicButton.isChecked()){
-            removeSpansWithinSelection(Typeface.ITALIC);
+            removeSpansWithinSelection(getSelectionStart(), getSelectionEnd(), Typeface.ITALIC);
         }
 
         if (underlineButton.isChecked() && start != end){
@@ -263,29 +254,13 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
         else if (!strikeThroughButton.isChecked()){
             removeSpansWithinSelection(StrikethroughSpan.class);
         }
-
-        if (subscriptButton.isChecked() && start != end){
-            this.getText().setSpan(new SubscriptSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }
-        else if (!subscriptButton.isChecked()){
-            removeSpansWithinSelection(SubscriptSpan.class, RelativeSizeSpan.class);
-        }
-
-        if (superscriptButton.isChecked() && start != end){
-            this.getText().setSpan(new SuperscriptSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }
-        else if (!superscriptButton.isChecked()){
-            removeSpansWithinSelection(SuperscriptSpan.class, RelativeSizeSpan.class);
-        }
     }
 
     /**
      * Removes the spans within the selection matching the {@link StyleSpan} Id given
      * @param spanId the Id of the style
      */
-    protected void removeSpansWithinSelection(int spanId) {
-        int start = this.getSelectionStart();
-        int end = this.getSelectionEnd();
+    protected void removeSpansWithinSelection(int start, int end, int spanId) {
         for (StyleSpan span: this.getText().getSpans(start, end, StyleSpan.class)) {
             if (span.getStyle() == spanId) {
                 this.getText().removeSpan(span);
@@ -294,13 +269,20 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
     }
 
     /**
-     * Removes the spans within the selection matching the class given.
-     * @param classes Not all spans are referenced by a {@link Typeface} Id
-     * therefore, they are found by comparing their class to the class passed by this method
+     * @see #removeSpans(int, int, Class[])
      */
     protected void removeSpansWithinSelection(Class... classes) {
-        int start = this.getSelectionStart();
-        int end = this.getSelectionEnd();
+        removeSpans(getSelectionStart(), getSelectionEnd(), classes);
+    }
+
+    /**
+     * Removes the spans within the selection matching the class given.
+     * @param classes Not all spans are referenced by a {@link Typeface} Id
+     * @param start Where to begin removing the spans specified by classes
+     * @param end Where to end removing the spans specified by classes
+     * therefore, they are found by comparing their class to the class passed by this method
+     */
+    protected void removeSpans(int start, int end, Class... classes){
         for (ParcelableSpan span: this.getText().getSpans(start, end, ParcelableSpan.class)) {
             for (Class c: classes) {
                 if (span.getClass().equals(c)) {
@@ -319,7 +301,7 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
      */
 
     public void setAllButtons(ToggleButton boldButton, ToggleButton italicButton, ToggleButton underlineButton,
-                              ToggleButton strikeThroughButton, ToggleButton subscriptButton, ToggleButton superscriptButton){
+                              ToggleButton strikeThroughButton, Button subscriptButton, Button superscriptButton){
         try {
             this.boldButton = boldButton;
             this.italicButton = italicButton;

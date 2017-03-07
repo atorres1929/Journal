@@ -61,8 +61,8 @@ public class NewEntryFragment extends Fragment {
     private ToggleButton italicButton;
     private ToggleButton underlineButton;
     private ToggleButton strikeThroughButton;
-    private ToggleButton subcriptButton;
-    private ToggleButton superscriptButton;
+    private Button subcriptButton;
+    private Button superscriptButton;
     private RichEditText entryText;
 
     private NewEntryFragmentListner mListener;
@@ -108,8 +108,8 @@ public class NewEntryFragment extends Fragment {
         italicButton = (ToggleButton) v.findViewById(R.id.italicButton);
         underlineButton = (ToggleButton) v.findViewById(R.id.underlineButton);
         strikeThroughButton = (ToggleButton) v.findViewById(R.id.strikeThroughButton);
-        subcriptButton = (ToggleButton) v.findViewById(R.id.subscriptButton);
-        superscriptButton = (ToggleButton) v.findViewById(R.id.superscriptButton);
+        subcriptButton = (Button) v.findViewById(R.id.subscriptButton);
+        superscriptButton = (Button) v.findViewById(R.id.superscriptButton);
 
         //Set custom text styles for buttons
         underlineButton.setPaintFlags(Paint.UNDERLINE_TEXT_FLAG);
@@ -117,14 +117,10 @@ public class NewEntryFragment extends Fragment {
         SpannableStringBuilder s = new SpannableStringBuilder("X2");
         s.setSpan(new SubscriptSpan(), 1, 2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         s.setSpan(new RelativeSizeSpan(0.75f), 1, 2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        subcriptButton.setTextOff(s);
-        subcriptButton.setTextOn(s);
         subcriptButton.setText(s);
         s = new SpannableStringBuilder("X2");
         s.setSpan(new SuperscriptSpan(), 1, 2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         s.setSpan(new RelativeSizeSpan(0.75f), 1, 2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        superscriptButton.setTextOn(s);
-        superscriptButton.setTextOff(s);
         superscriptButton.setText(s);
 
         entryText = (RichEditText) v.findViewById(R.id.newEntryTextView);

@@ -63,7 +63,7 @@
                 android:textOff="@string/button_strikethrough"
                 android:textOn="@string/button_strikethrough" />
 
-            <ToggleButton
+            <Button
                 android:id="@+id/subscriptButton"
                 android:layout_width="50dp"
                 android:layout_height="wrap_content"
@@ -73,7 +73,7 @@
                 android:textColor="@android:color/white"
                 android:textAllCaps="false"/>
 
-            <ToggleButton
+            <Button
                 android:id="@+id/superscriptButton"
                 android:layout_width="50dp"
                 android:layout_height="wrap_content"
