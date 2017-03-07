@@ -1,5 +1,6 @@
 package com.artifexiumgames.journal.CustomTextEditor;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Typeface;
@@ -115,7 +116,7 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
                 }
             }
 
-            if (span instanceof UnderlineSpan){
+            if (span instanceof MyUnderlineSpan){
                 underlined = true;
             }
         }
@@ -174,7 +175,7 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
             getText().setSpan(new StyleSpan(Typeface.ITALIC), start, start + count, 0);
         }
         if (underlineButton != null && underlineButton.isChecked()){
-            getText().setSpan(new UnderlineSpan(), start, start + count, 0);
+            getText().setSpan(new MyUnderlineSpan(), start, start + count, 0);
         }
     }
 
@@ -235,11 +236,11 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
 
         if (underlineButton.isChecked()){
             if (start != end){
-                this.getText().setSpan(new UnderlineSpan(), start, end, 0);
+                this.getText().setSpan(new MyUnderlineSpan(), start, end, 0);
             }
         }
         else if (!underlineButton.isChecked()){
-            removeSpansWithinSelection(UnderlineSpan.class);
+            removeSpansWithinSelection(MyUnderlineSpan.class);
         }
     }
 
@@ -317,6 +318,11 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
     public interface OnSelectionChangeListener {
 
         void onSelectionChange(int start, int end);
+    }
+
+    @SuppressLint("ParcelCreator")
+    private class MyUnderlineSpan extends UnderlineSpan {
+
     }
 
 

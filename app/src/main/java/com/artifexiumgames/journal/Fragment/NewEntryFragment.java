@@ -113,10 +113,6 @@ public class NewEntryFragment extends Fragment implements View.OnClickListener{
         upButton.setOnClickListener(this);
         downButton.setOnClickListener(this);
 
-        boldButton.setOnClickListener(this);
-        italicButton.setOnClickListener(this);
-        underlineButton.setOnClickListener(this);
-
         return v;
 
     }
