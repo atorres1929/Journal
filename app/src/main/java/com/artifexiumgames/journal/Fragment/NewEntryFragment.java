@@ -3,6 +3,7 @@ package com.artifexiumgames.journal.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Paint;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
@@ -18,6 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ToggleButton;
 
 import com.artifexiumgames.journal.RichEditText.RichEditText;
@@ -55,6 +57,8 @@ public class NewEntryFragment extends Fragment {
     private ToggleButton strikeThroughButton;
     private Button subcriptButton;
     private Button superscriptButton;
+    private ImageButton indentButton;
+    private ImageButton unindentButton;
     private RichEditText entryText;
 
     private NewEntryFragmentListner mListener;
@@ -102,6 +106,8 @@ public class NewEntryFragment extends Fragment {
         strikeThroughButton = (ToggleButton) v.findViewById(R.id.strikeThroughButton);
         subcriptButton = (Button) v.findViewById(R.id.subscriptButton);
         superscriptButton = (Button) v.findViewById(R.id.superscriptButton);
+        unindentButton = (ImageButton) v.findViewById(R.id.unindentButton);
+        indentButton = (ImageButton) v.findViewById(R.id.indentButton);
 
         //Set custom text styles for buttons
         underlineButton.setPaintFlags(Paint.UNDERLINE_TEXT_FLAG);
@@ -116,7 +122,7 @@ public class NewEntryFragment extends Fragment {
         superscriptButton.setText(s);
 
         entryText = (RichEditText) v.findViewById(R.id.newEntryTextView);
-        entryText.setAllButtons(boldButton, italicButton, underlineButton, strikeThroughButton, subcriptButton, superscriptButton);
+        entryText.setAllButtons(boldButton, italicButton, underlineButton, strikeThroughButton, subcriptButton, superscriptButton, unindentButton, indentButton);
 
         return v;
 
@@ -172,16 +178,7 @@ public class NewEntryFragment extends Fragment {
     }
 
     private void tabButtonAction() {
-        int selectionStart = entryText.getSelectionStart();
-        int selectionEnd = entryText.getSelectionEnd();
-        String newText = entryText.getText().insert(entryText.getSelectionStart(), getString(R.string.tabCharacter)).toString();
-        entryText.setText(newText);
-        if (selectionStart != selectionEnd) {
-            entryText.setSelection(selectionStart + 4, selectionEnd);
-        }
-        else{
-            entryText.setSelection(selectionStart);
-        }
+
     }
 
     private void timeButtonAction(){

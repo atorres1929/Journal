@@ -112,6 +112,5 @@
     <string name="button_italic">I</string>
     <string name="button_underline">U</string>
     <string name="button_strikethrough">&#160;S&#160;</string>
-    <string name="tabCharacter">&#160;&#160;&#160;&#160;</string>
     <string name="bold"></string>
 </resources>
