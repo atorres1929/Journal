@@ -1,17 +1,15 @@
-package com.artifexiumgames.journal.CustomTextEditor;
+package com.artifexiumgames.journal.RichEditText;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
 import android.text.ParcelableSpan;
 import android.text.Spanned;
 import android.text.TextWatcher;
-import android.text.style.RelativeSizeSpan;
 import android.text.style.StrikethroughSpan;
 import android.text.style.StyleSpan;
 import android.text.style.SubscriptSpan;
@@ -23,8 +21,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ToggleButton;
-
-import com.artifexiumgames.journal.R;
 
 /**
  * This is a simple Rich Text Editor that provides added functionality to {@link EditText}.
@@ -199,11 +195,19 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
             updateTextStyle();
         }
         if (id == subscriptButton.getId()){
-            //TODO add subscript button dialog
+            subscriptAction();
         }
         if (id == superscriptButton.getId()){
             //TODO add superscript button dialog
         }
+    }
+
+    private void subscriptAction(){
+        getText().setSpan(new SubscriptSpan(), getSelectionStart(), getSelectionStart() + 1, Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
+    }
+
+    private void superscriptAction(){
+
     }
 
     /**
