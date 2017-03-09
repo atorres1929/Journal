@@ -146,8 +146,6 @@
                 android:visibility="visible"
                 tools:context="com.artifexiumgames.journal.Fragment.NewEntryFragment">
 
-                <!-- TODO: Update blank fragment layout -->
-
                 <com.artifexiumgames.journal.RichEditText.RichEditText
                     android:id="@+id/newEntryTextView"
                     android:layout_width="match_parent"

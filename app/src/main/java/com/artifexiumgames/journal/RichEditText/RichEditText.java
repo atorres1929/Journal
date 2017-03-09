@@ -2,7 +2,6 @@ package com.artifexiumgames.journal.RichEditText;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Notification;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
@@ -12,13 +11,12 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
 import android.text.InputType;
+import android.text.Layout;
 import android.text.ParcelableSpan;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextWatcher;
-import android.text.style.CharacterStyle;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.MetricAffectingSpan;
 import android.text.style.RelativeSizeSpan;
@@ -29,14 +27,24 @@ import android.text.style.SuperscriptSpan;
 import android.text.style.UnderlineSpan;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.artifexiumgames.journal.R;
+
+import java.util.ArrayList;
 import java.util.Calendar;
+
+import static android.R.id.list;
 
 //TODO left, right, center align buttons
 //TODO foreground, background color buttons
@@ -101,10 +109,11 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
     protected ColorDrawable currentTextColor;
     protected View backgroundButton;
     protected ColorDrawable currentBackgroundColor;
+    protected String[] colorList;
 
     //Settings
-    protected float relativeSize = 0.5f;
-    protected int numTabs = 4;
+    protected float relativeSize;
+    protected int numTabs;
 
     /**
      * Default Constructor needed to extend {@link EditText}
@@ -129,10 +138,22 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
     }
 
     /**
-     * Adds this class as it's own text listener
+     * Adds this class as it's own text listener and initializes the default settings
+     * for:
+     * <ul>
+     *     <li>Relative Size (subscript/superscript)</li>
+     *     <li>Number of Spaces in a tab</li>
+     *     <li>The colors you can choose from in the text color or background color dialog</li>
+     * </ul>
      */
     protected void init() {
         addTextChangedListener(this);
+        relativeSize = 0.5f;
+        numTabs = 4;
+        colorList = new String[]{"Black - #000000", "White - #FFFFFF",
+                "Green - #00800", "Blue - #0000FF", "Purple - #800080",
+                "Red - #FF0000", "Orange - #FFA500", "Yellow - #FFFF00",
+                "Hot Pink - #FF69B4", "Light Blue - #00FFF9", "Brown - #A52A2A"};
     }
 
     @Override
@@ -368,10 +389,10 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                SpannableStringBuilder builder = new SpannableStringBuilder(input.getText());
-                builder.setSpan(span, 0, input.getText().length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                builder.setSpan(new RelativeSizeSpan(relativeSize), 0, input.getText().length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                getText().insert(getSelectionStart(), builder);
+                SpannableString spannedText = new SpannableString(input.getText());
+                spannedText.setSpan(span, 0, input.getText().length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                spannedText.setSpan(new RelativeSizeSpan(relativeSize), 0, input.getText().length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                getText().insert(getSelectionStart(), spannedText);
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -446,13 +467,21 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
 
     //TODO Document Me!
     public void textColorAction(){
-        final Spinner colorPicker = new Spinner(getContext());
         final int selectionStart = getSelectionStart();
         final int selectionEnd = getSelectionEnd();
+        int[] hexColors = new int[colorList.length];
+        SpannableString[] spannedColorList = new SpannableString[colorList.length];
+        for (int i = 0; i < colorList.length; i ++){
+            String color = colorList[i];
+            String hex = color.substring(color.indexOf('#'), color.length() - 1);
+            hexColors[i] = Integer.decode(hex);
+            spannedColorList[i] = new SpannableString(color);
+            spannedColorList[i].setSpan(new ForegroundColorSpan(hexColors[i]), 0, color.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        SpannedAdapter listArray = new SpannedAdapter(getContext(), spannedColorList);
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("Choose Color for Text: " + relativeSize);
-        builder.setView(colorPicker);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        builder.setAdapter(listArray, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 getText().setSpan(new ForegroundColorSpan(Color.YELLOW), selectionStart, selectionEnd, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
@@ -589,6 +618,14 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
         this.backgroundButton.setBackground(currentBackgroundColor);
     }
 
+    public void setColorList(String[] colors){
+        colorList = colors;
+    }
+
+    public String[] getColorList(){
+        return colorList;
+    }
+
     protected void settings(){
         //TODO for indent - set spacing
         //TODO set line spacing
@@ -635,6 +672,60 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
     @SuppressLint("ParcelCreator")
     protected class MyUnderlineSpan extends UnderlineSpan {
 
+    }
+
+    /**
+     * Code adapted from http://stackoverflow.com/questions/4580664/how-put-spanned-into-list-setadapter
+     * Credit where credit is due.
+     * <br>
+     * It's basically a custom adapter to allow you to have different colors for each item in an AlertDialog
+     */
+    protected static class SpannedAdapter extends BaseAdapter {
+
+        private LayoutInflater inflater;
+        private SpannableString[] list;
+
+        protected SpannedAdapter(Context context, SpannableString[] articleList) {
+            inflater = LayoutInflater.from(context);
+            list = articleList;
+        }
+
+        @Override
+        public int getCount() {
+            return list.length;
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return list[position];
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder holder;
+            if (convertView == null) {
+                convertView = inflater.inflate(android.R.layout.simple_spinner_item, null);
+                holder = new ViewHolder();
+                holder.text = new TextView(convertView.getContext());
+
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
+            }
+
+            holder.text.setText(list[position]);
+
+            return convertView;
+        }
+
+        protected static class ViewHolder{
+            protected TextView text;
+        }
     }
 
 
