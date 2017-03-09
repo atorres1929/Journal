@@ -17,6 +17,24 @@
             android:layout_height="match_parent"
             android:orientation="horizontal" >
 
+            <Button
+                android:id="@+id/unindentButton"
+                android:layout_width="@dimen/horizontal_scroll_button_width"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/custom_button_bordered"
+                android:foreground="@mipmap/ic_unindent"
+                app:srcCompat="@mipmap/ic_unindent" />
+
+            <Button
+                android:id="@+id/indentButton"
+                android:layout_width="@dimen/horizontal_scroll_button_width"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/custom_button_bordered"
+                android:foreground="@mipmap/ic_indent"
+                app:srcCompat="@mipmap/ic_indent" />
+
             <ToggleButton
                 android:id="@+id/boldButton"
                 android:layout_width="@dimen/horizontal_scroll_button_width"
@@ -52,6 +70,24 @@
                 android:textOff="@string/button_underline"
                 android:textOn="@string/button_underline" />
 
+            <Button
+                android:id="@+id/foregroundColorButton"
+                android:layout_width="@dimen/horizontal_scroll_button_width"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/custom_button_bordered"
+                android:foreground="@mipmap/ic_textcolor"
+                app:srcCompat="@mipmap/ic_indent" />
+
+            <Button
+                android:id="@+id/backgroundColorButton"
+                android:layout_width="@dimen/horizontal_scroll_button_width"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/custom_button_bordered"
+                android:foreground="@mipmap/ic_textcolor"
+                app:srcCompat="@mipmap/ic_indent" />
+
             <ToggleButton
                 android:id="@+id/strikeThroughButton"
                 android:layout_width="@dimen/horizontal_scroll_button_width"
@@ -82,22 +118,6 @@
                 android:fontFamily="serif"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white" />
-
-            <ImageButton
-                android:id="@+id/unindentButton"
-                android:layout_width="@dimen/horizontal_scroll_button_width"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/custom_button_bordered"
-                app:srcCompat="@mipmap/ic_unindent" />
-
-            <ImageButton
-                android:id="@+id/indentButton"
-                android:layout_width="@dimen/horizontal_scroll_button_width"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/custom_button_bordered"
-                app:srcCompat="@mipmap/ic_indent" />
 
         </LinearLayout>
     </HorizontalScrollView>

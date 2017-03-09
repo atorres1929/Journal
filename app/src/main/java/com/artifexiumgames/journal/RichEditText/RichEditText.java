@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
@@ -13,7 +14,6 @@ import android.text.ParcelableSpan;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextWatcher;
-import android.text.style.CharacterStyle;
 import android.text.style.MetricAffectingSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StrikethroughSpan;
@@ -27,8 +27,9 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ToggleButton;
+
+import java.util.Calendar;
 
 //TODO left, right, center align buttons
 //TODO foreground, background color buttons
@@ -85,10 +86,14 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
     protected ToggleButton italicButton;
     protected ToggleButton underlineButton;
     protected ToggleButton strikeThroughButton;
-    protected Button subscriptButton;
-    protected Button superscriptButton;
-    protected ImageButton indentButton;
-    protected ImageButton unindentButton;
+    protected View subscriptButton;
+    protected View superscriptButton;
+    protected View indentButton;
+    protected View unindentButton;
+    protected View foregroundButton;
+    protected ColorDrawable currentForegroundColor;
+    protected View backgroundButton;
+    protected ColorDrawable currentBackgroundColor;
 
     //Settings
     protected float relativeSize = 0.5f;
@@ -123,22 +128,31 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
         addTextChangedListener(this);
     }
 
+    @Override
+    protected void onSelectionChanged(int selStart, int selEnd) {
+        super.onSelectionChanged(selStart, selEnd);
+        updateTextStylesOnSelectionChange(selStart, selEnd);
+    }
+
     /**
-     * When the selection is changed, the checked status of all buttons are updated
+     * When the selection is changed, the checked status of all buttons are updated to match the styles
+     * within the text.
      * <br>
      * Flow Chart:
      * <ol>
      *      <li>Selection Changed</li>
-     *      <li>Check if styles within selection match the buttons<br><b>e.g. IF bold, then make bold button chekced = true</b></li>
+     *      <li>
+     *          Check if styles within selection match the buttons
+     *          <br>
+     *          <b>e.g. IF bold, then make bold button chekced = true</b>
+     *      </li>
      * </ol>
      *
      * @param selStart start of selection
      * @param selEnd   end of selection
+     * @see #onSelectionChanged(int, int)
      */
-    @Override
-    protected void onSelectionChanged(int selStart, int selEnd) {
-        super.onSelectionChanged(selStart, selEnd);
-
+    public void updateTextStylesOnSelectionChange(int selStart, int selEnd){
         if (onSelectionChangeListener != null) {
             onSelectionChangeListener.onSelectionChange(selStart, selEnd);
         }
@@ -147,8 +161,6 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
         boolean isSelectionItalic = false;
         boolean isSelectionUnderlined = false;
         boolean isSelectionStriked = false;
-        boolean isSelectionSubscripted = false;
-        boolean isSelectionSuperscripted = false;
         for (ParcelableSpan span : getText().getSpans(selStart, selEnd, ParcelableSpan.class)) {
             if (span instanceof StyleSpan) {
                 if (((StyleSpan) span).getStyle() == Typeface.BOLD) {
@@ -166,13 +178,6 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
                 isSelectionStriked = true;
             }
 
-            if (span instanceof SubscriptSpan) {
-                isSelectionSubscripted = true;
-            }
-
-            if (span instanceof SuperscriptSpan) {
-                isSelectionSuperscripted = true;
-            }
         }
 
         if (boldButton != null) {
@@ -187,7 +192,6 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
         if (strikeThroughButton != null) {
             strikeThroughButton.setChecked(isSelectionStriked);
         }
-
     }
 
     /**
@@ -195,7 +199,7 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
      */
     @Override
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
+        //Necessary to implement TextWatcher
     }
 
     /**
@@ -227,7 +231,7 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
      */
     @Override
     public void afterTextChanged(Editable s) {
-
+        //Necessary to implement TextWatcher
     }
 
     /**
@@ -240,7 +244,7 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
     public void onClick(View v) {
         int id = v.getId();
         if (id == boldButton.getId() || id == italicButton.getId() || id == underlineButton.getId()) {
-            updateTextStyle();
+            updateTextStyleAction();
         }
         else if (id == subscriptButton.getId()) {
             subscriptAction();
@@ -254,10 +258,90 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
         else if (id == unindentButton.getId()){
             unindentAction();
         }
+        else if (id == foregroundButton.getId()){
+            foregroundColorAction();
+        }
         else{
-
+            Log.e(TAG, "You forgot to assign a button!");
         }
 
+    }
+
+    /**
+     * Updates the text style of a selection when text is not being input into the editor
+     * <br>
+     * <b>e.g.</b> highlighting text and then applying bold to it <i>without changing the text</i>
+     * <br><br>
+     * Flow Chart:
+     * <ol>
+     * <li>Text Highlighted</li>
+     * <li>Style Button Pressed</li>
+     * <li>Check if current selection has style
+     * <ul>
+     * <li>IF true: remove style</li>
+     * <li>IF false: apply style</li>
+     * </ul>
+     * </li>
+     * <p>
+     * </ol>
+     */
+    protected void updateTextStyleAction() {
+        int start = this.getSelectionStart();
+        int end = this.getSelectionEnd();
+        if (boldButton.isChecked() && start != end) {
+            this.getText().setSpan(new StyleSpan(Typeface.BOLD), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        } else if (!boldButton.isChecked()) {
+            removeSpansWithinSelection(Typeface.BOLD);
+        }
+
+        if (italicButton.isChecked() && start != end) {
+            this.getText().setSpan(new StyleSpan(Typeface.ITALIC), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        } else if (!italicButton.isChecked()) {
+            removeSpansWithinSelection(Typeface.ITALIC);
+        }
+
+        if (underlineButton.isChecked() && start != end) {
+            this.getText().setSpan(new MyUnderlineSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        } else if (!underlineButton.isChecked()) {
+            removeSpansWithinSelection(MyUnderlineSpan.class);
+        }
+
+        if (strikeThroughButton.isChecked() && start != end) {
+            this.getText().setSpan(new StrikethroughSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        } else if (!strikeThroughButton.isChecked()) {
+            removeSpansWithinSelection(StrikethroughSpan.class);
+        }
+    }
+
+    /**
+     * Removes the spans within the selection matching the class given.
+     *
+     * @param classes Not all spans are referenced by a {@link Typeface} Id
+     *                therefore, they are found by comparing their class to the class passed by this method
+     * @see #updateTextStyleAction()
+     */
+    protected void removeSpansWithinSelection(Class... classes) {
+        for (ParcelableSpan span : this.getText().getSpans(getSelectionStart(), getSelectionEnd(), ParcelableSpan.class)) {
+            for (Class c : classes) {
+                if (span.getClass().equals(c)) {
+                    this.getText().removeSpan(span);
+                }
+            }
+        }
+    }
+
+    /**
+     * Removes the spans within the selection matching the {@link StyleSpan} Id given
+     *
+     * @param spanId the Id of the style to be removed. See {@link Typeface} for Ids.
+     * @see #updateTextStyleAction()
+     */
+    protected void removeSpansWithinSelection(int spanId) {
+        for (StyleSpan span : this.getText().getSpans(getSelectionStart(), getSelectionEnd(), StyleSpan.class)) {
+            if (span.getStyle() == spanId) {
+                this.getText().removeSpan(span);
+            }
+        }
     }
 
     /**
@@ -297,18 +381,21 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
     /**
      * @see #relativeSizeFormat(MetricAffectingSpan)
      */
-    protected void subscriptAction(){
+    public void subscriptAction(){
         relativeSizeFormat(new SubscriptSpan());
     }
 
     /**
      * @see #relativeSizeFormat(MetricAffectingSpan)
      */
-    protected void superscriptAction() {
+    public void superscriptAction() {
         relativeSizeFormat(new SuperscriptSpan());
     }
 
-    protected void indentAction(){
+    /**
+     * Indents the text by adding spaces. The number of spaces is determined by {@code numTabs}
+     */
+    public void indentAction(){
         int selectionStart = getSelectionStart();
         int selectionEnd = getSelectionEnd();
         String tabs = "";
@@ -318,17 +405,20 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
         Editable newText = getText().insert(getSelectionStart(), tabs);
         setText(newText);
         if (selectionStart != selectionEnd) {
-            setSelection(selectionStart + numTabs, selectionEnd);
+            setSelection(selectionStart + numTabs, selectionEnd + numTabs);
         }
         else{
             setSelection(selectionStart + numTabs);
         }
     }
 
-    protected void unindentAction() {
+    /**
+     * UnIndents the text by removing spaces. The number of spaces is determined by {@code numTabs}
+     */
+    public void unindentAction() {
         int selectionStart = getSelectionStart();
         int selectionEnd = getSelectionEnd();
-        if (selectionStart > 0) {
+        if (selectionStart >= numTabs) {
             String tabCharacter = "";
             for (int i = 0; i < numTabs; i++){
                 tabCharacter += spaceCharacter;
@@ -347,89 +437,34 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
         }
     }
 
-
-    /**
-     * Updates the text style of a selection when text is not being input into the editor
-     * <br>
-     * <b>e.g.</b> highlighting text and then applying bold to it <i>without changing the text</i>
-     * <br><br>
-     * Flow Chart:
-     * <ol>
-     * <li>Text Highlighted</li>
-     * <li>Style Button Pressed</li>
-     * <li>Check if current selection has style
-     * <ul>
-     * <li>IF true: remove style</li>
-     * <li>IF false: apply style</li>
-     * </ul>
-     * </li>
-     * <p>
-     * </ol>
-     */
-    protected void updateTextStyle() {
-        int start = this.getSelectionStart();
-        int end = this.getSelectionEnd();
-        if (boldButton.isChecked() && start != end) {
-            this.getText().setSpan(new StyleSpan(Typeface.BOLD), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        } else if (!boldButton.isChecked()) {
-            removeSpansWithinSelection(getSelectionStart(), getSelectionEnd(), Typeface.BOLD);
-        }
-
-        if (italicButton.isChecked() && start != end) {
-            this.getText().setSpan(new StyleSpan(Typeface.ITALIC), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        } else if (!italicButton.isChecked()) {
-            removeSpansWithinSelection(getSelectionStart(), getSelectionEnd(), Typeface.ITALIC);
-        }
-
-        if (underlineButton.isChecked() && start != end) {
-            this.getText().setSpan(new MyUnderlineSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        } else if (!underlineButton.isChecked()) {
-            removeSpansWithinSelection(MyUnderlineSpan.class);
-        }
-
-        if (strikeThroughButton.isChecked() && start != end) {
-            this.getText().setSpan(new StrikethroughSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        } else if (!strikeThroughButton.isChecked()) {
-            removeSpansWithinSelection(StrikethroughSpan.class);
-        }
+    //TODO Document Me!
+    public void foregroundColorAction(){
+        //TODO Implement me!
     }
 
-    /**
-     * Removes the spans within the selection matching the {@link StyleSpan} Id given
-     *
-     * @param spanId the Id of the style
-     */
-    protected void removeSpansWithinSelection(int start, int end, int spanId) {
-        for (StyleSpan span : this.getText().getSpans(start, end, StyleSpan.class)) {
-            if (span.getStyle() == spanId) {
-                this.getText().removeSpan(span);
-            }
-        }
+    protected void insertTimeAction(){
+        Calendar c = Calendar.getInstance();
+        String date = "<"+c.get(Calendar.HOUR)+":"+c.get(Calendar.MINUTE)+":"+c.get(Calendar.SECOND)+">";
+        String newText = getText().insert(getSelectionStart(), date).toString();
+        setText(newText);
+        setSelection(getSelectionStart()+date.length());
     }
 
-    /**
-     * @see #removeSpans(int, int, Class[])
-     */
-    protected void removeSpansWithinSelection(Class... classes) {
-        removeSpans(getSelectionStart(), getSelectionEnd(), classes);
+    protected void insertDateAction(){
+        Calendar c = Calendar.getInstance();
+        String time = "<"+c.get(Calendar.MONTH)+"-"+c.get(Calendar.DAY_OF_MONTH)+"-"+c.get(Calendar.YEAR)+">";
+        String newText = getText().insert(getSelectionStart(), time).toString();
+        setText(newText);
+        setSelection(getSelectionStart()+time.length());
     }
 
-    /**
-     * Removes the spans within the selection matching the class given.
-     *
-     * @param classes Not all spans are referenced by a {@link Typeface} Id
-     * @param start   Where to begin removing the spans specified by classes
-     * @param end     Where to end removing the spans specified by classes
-     *                therefore, they are found by comparing their class to the class passed by this method
-     */
-    protected void removeSpans(int start, int end, Class... classes) {
-        for (ParcelableSpan span : this.getText().getSpans(start, end, ParcelableSpan.class)) {
-            for (Class c : classes) {
-                if (span.getClass().equals(c)) {
-                    this.getText().removeSpan(span);
-                }
-            }
-        }
+    protected void pageUpAction(){
+        setSelection(0);
+    }
+
+
+    protected void pageDownAction(){
+        setSelection(getText().length());
     }
 
     /**
@@ -440,9 +475,9 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
      * {@link #onClick(View)} within your own OnClickListener's method.
      */
 
-    public void setAllButtons(ToggleButton boldButton, ToggleButton italicButton, ToggleButton underlineButton,
-                              ToggleButton strikeThroughButton, Button subscriptButton, Button superscriptButton,
-                              ImageButton unindentButton, ImageButton indentButton) {
+    public void setAllButtons(ToggleButton boldButton, ToggleButton italicButton, ToggleButton underlineButton, ToggleButton strikeThroughButton,
+                              View subscriptButton, View superscriptButton,
+                              View unindentButton, View indentButton) {
         try {
             setBoldButton(boldButton);
             setItalicButton(italicButton);
@@ -477,28 +512,55 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
         this.strikeThroughButton.setOnClickListener(this);
     }
 
-    public void setSubscriptButton(Button button) {
+    public void setSubscriptButton(View button) {
         this.subscriptButton = button;
         this.subscriptButton.setOnClickListener(this);
     }
 
-    public void setSuperscriptButton(Button button) {
+    public void setSuperscriptButton(View button) {
         this.superscriptButton = button;
         this.superscriptButton.setOnClickListener(this);
     }
 
-    public void setIndentButton(ImageButton button){
+    public void setIndentButton(View button){
         this.indentButton = button;
         this.indentButton.setOnClickListener(this);
     }
 
-    public void setUnindentButton(ImageButton button){
+    public void setUnindentButton(View button){
         this.unindentButton = button;
         this.unindentButton.setOnClickListener(this);
     }
 
+    public void setForegroundButton(View button){
+        this.foregroundButton = button;
+        this.foregroundButton.setOnClickListener(this);
+    }
+
+    public ColorDrawable getCurrentForegroundColor(){
+        return currentForegroundColor;
+    }
+
+    public void setCurrentForegroundColor(ColorDrawable color){
+        this.currentForegroundColor = color;
+        this.foregroundButton.setForeground(currentForegroundColor);
+    }
+
+    public void setBackgroundButton(View button){
+        this.backgroundButton = button;
+        this.backgroundButton.setOnClickListener(this);
+    }
+
+    public ColorDrawable getCurrentBackgroundColor(){
+        return currentBackgroundColor;
+    }
+
+    public void setCurrentBackgroundColor(ColorDrawable color){
+        this.currentBackgroundColor = color;
+        this.backgroundButton.setBackground(currentBackgroundColor);
+    }
+
     protected void settings(){
-        //TODO for bullet button - indent or not indent when presssed
         //TODO for indent - set spacing
         //TODO set line spacing
         //TODO set font size

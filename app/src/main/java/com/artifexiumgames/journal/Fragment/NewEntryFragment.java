@@ -57,8 +57,8 @@ public class NewEntryFragment extends Fragment {
     private ToggleButton strikeThroughButton;
     private Button subcriptButton;
     private Button superscriptButton;
-    private ImageButton indentButton;
-    private ImageButton unindentButton;
+    private Button indentButton;
+    private Button unindentButton;
     private RichEditText entryText;
 
     private NewEntryFragmentListner mListener;
@@ -106,8 +106,8 @@ public class NewEntryFragment extends Fragment {
         strikeThroughButton = (ToggleButton) v.findViewById(R.id.strikeThroughButton);
         subcriptButton = (Button) v.findViewById(R.id.subscriptButton);
         superscriptButton = (Button) v.findViewById(R.id.superscriptButton);
-        unindentButton = (ImageButton) v.findViewById(R.id.unindentButton);
-        indentButton = (ImageButton) v.findViewById(R.id.indentButton);
+        unindentButton = (Button) v.findViewById(R.id.unindentButton);
+        indentButton = (Button) v.findViewById(R.id.indentButton);
 
         //Set custom text styles for buttons
         underlineButton.setPaintFlags(Paint.UNDERLINE_TEXT_FLAG);
@@ -176,35 +176,6 @@ public class NewEntryFragment extends Fragment {
                 return super.onOptionsItemSelected(item);
         }
     }
-
-    private void tabButtonAction() {
-
-    }
-
-    private void timeButtonAction(){
-        Calendar c = Calendar.getInstance();
-        String date = "<"+c.get(Calendar.HOUR)+":"+c.get(Calendar.MINUTE)+":"+c.get(Calendar.SECOND)+">";
-        String newText = entryText.getText().insert(entryText.getSelectionStart(), date).toString();
-        entryText.setText(newText);
-        entryText.setSelection(entryText.getSelectionStart()+date.length());
-    }
-
-    private void dateButtonAction(){
-        Calendar c = Calendar.getInstance();
-        String time = "<"+c.get(Calendar.MONTH)+"-"+c.get(Calendar.DAY_OF_MONTH)+"-"+c.get(Calendar.YEAR)+">";
-        String newText = entryText.getText().insert(entryText.getSelectionStart(), time).toString();
-        entryText.setText(newText);
-        entryText.setSelection(entryText.getSelectionStart()+time.length());
-    }
-
-    private void upButtonAction(){
-        entryText.setSelection(0);
-    }
-
-    private void downButtonAction(){
-        entryText.setSelection(entryText.getText().length());
-    }
-
 
     /**
      * This interface must be implemented by activities that contain this
