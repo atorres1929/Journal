@@ -2,8 +2,10 @@ package com.artifexiumgames.journal.RichEditText;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Notification;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.AlertDialog;
@@ -11,9 +13,13 @@ import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.ParcelableSpan;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextWatcher;
+import android.text.style.CharacterStyle;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.MetricAffectingSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StrikethroughSpan;
@@ -27,6 +33,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.ToggleButton;
 
 import java.util.Calendar;
@@ -90,8 +97,8 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
     protected View superscriptButton;
     protected View indentButton;
     protected View unindentButton;
-    protected View foregroundButton;
-    protected ColorDrawable currentForegroundColor;
+    protected View textColorButton;
+    protected ColorDrawable currentTextColor;
     protected View backgroundButton;
     protected ColorDrawable currentBackgroundColor;
 
@@ -258,8 +265,8 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
         else if (id == unindentButton.getId()){
             unindentAction();
         }
-        else if (id == foregroundButton.getId()){
-            foregroundColorAction();
+        else if (id == textColorButton.getId()){
+            textColorAction();
         }
         else{
             Log.e(TAG, "You forgot to assign a button!");
@@ -438,8 +445,27 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
     }
 
     //TODO Document Me!
-    public void foregroundColorAction(){
-        //TODO Implement me!
+    public void textColorAction(){
+        final Spinner colorPicker = new Spinner(getContext());
+        final int selectionStart = getSelectionStart();
+        final int selectionEnd = getSelectionEnd();
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Choose Color for Text: " + relativeSize);
+        builder.setView(colorPicker);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                getText().setSpan(new ForegroundColorSpan(Color.YELLOW), selectionStart, selectionEnd, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     protected void insertTimeAction(){
@@ -477,7 +503,8 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
 
     public void setAllButtons(ToggleButton boldButton, ToggleButton italicButton, ToggleButton underlineButton, ToggleButton strikeThroughButton,
                               View subscriptButton, View superscriptButton,
-                              View unindentButton, View indentButton) {
+                              View unindentButton, View indentButton,
+                              View textColorButton, View backgroundButton) {
         try {
             setBoldButton(boldButton);
             setItalicButton(italicButton);
@@ -487,8 +514,10 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
             setSuperscriptButton(superscriptButton);
             setUnindentButton(unindentButton);
             setIndentButton(indentButton);
+            setTextColorButton(textColorButton);
+            setBackgroundButton(backgroundButton);
         } catch (NullPointerException ex) {
-            Log.e(TAG, "Remember, you can set buttons individually instead of setting them all at the same time", ex);
+            throw new NullPointerException("Remember, you can set buttons individually instead of setting them all at the same time");
         }
     }
 
@@ -532,23 +561,23 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
         this.unindentButton.setOnClickListener(this);
     }
 
-    public void setForegroundButton(View button){
-        this.foregroundButton = button;
-        this.foregroundButton.setOnClickListener(this);
-    }
-
-    public ColorDrawable getCurrentForegroundColor(){
-        return currentForegroundColor;
-    }
-
-    public void setCurrentForegroundColor(ColorDrawable color){
-        this.currentForegroundColor = color;
-        this.foregroundButton.setForeground(currentForegroundColor);
+    public void setTextColorButton(View button){
+        this.textColorButton = button;
+        this.textColorButton.setOnClickListener(this);
     }
 
     public void setBackgroundButton(View button){
         this.backgroundButton = button;
         this.backgroundButton.setOnClickListener(this);
+    }
+
+    public ColorDrawable getTextColor(){
+        return currentTextColor;
+    }
+
+    public void setTextColor(ColorDrawable color){
+        this.currentTextColor = color;
+        this.textColorButton.setForeground(currentTextColor);
     }
 
     public ColorDrawable getCurrentBackgroundColor(){
