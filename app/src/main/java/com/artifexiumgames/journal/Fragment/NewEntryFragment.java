@@ -3,15 +3,15 @@ package com.artifexiumgames.journal.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Paint;
-import android.graphics.Typeface;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.text.Editable;
-import android.text.ParcelableSpan;
-import android.text.TextWatcher;
-import android.text.style.StyleSpan;
-import android.text.style.UnderlineSpan;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.SubscriptSpan;
+import android.text.style.SuperscriptSpan;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,9 +19,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ToggleButton;
 
-import com.artifexiumgames.journal.CustomTextEditor.RichEditText;
+import com.artifexiumgames.journal.RichEditText.RichEditText;
 import com.artifexiumgames.journal.R;
 
 import java.util.Calendar;
@@ -35,7 +36,7 @@ import java.util.Calendar;
  * Use the {@link NewEntryFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class NewEntryFragment extends Fragment implements View.OnClickListener{
+public class NewEntryFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -53,6 +54,11 @@ public class NewEntryFragment extends Fragment implements View.OnClickListener{
     private ToggleButton boldButton;
     private ToggleButton italicButton;
     private ToggleButton underlineButton;
+    private ToggleButton strikeThroughButton;
+    private Button subcriptButton;
+    private Button superscriptButton;
+    private Button indentButton;
+    private Button unindentButton;
     private RichEditText entryText;
 
     private NewEntryFragmentListner mListener;
@@ -93,25 +99,30 @@ public class NewEntryFragment extends Fragment implements View.OnClickListener{
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_new_entry, container, false);
-        tabButton = (Button) v.findViewById(R.id.tabButton);
-        timeButton = (Button) v.findViewById(R.id.timeButton);
-        dateButton = (Button) v.findViewById(R.id.dateButton);
-        upButton = (Button) v.findViewById(R.id.scrollUpButton);
-        downButton = (Button) v.findViewById(R.id.scrollDownButton);
 
-        boldButton = (ToggleButton) v.findViewById(R.id.boldToggleButton);
-        italicButton = (ToggleButton) v.findViewById(R.id.italicToggleButton);
-        underlineButton = (ToggleButton) v.findViewById(R.id.underlineToggleButton);
+        boldButton = (ToggleButton) v.findViewById(R.id.boldButton);
+        italicButton = (ToggleButton) v.findViewById(R.id.italicButton);
+        underlineButton = (ToggleButton) v.findViewById(R.id.underlineButton);
+        strikeThroughButton = (ToggleButton) v.findViewById(R.id.strikeThroughButton);
+        subcriptButton = (Button) v.findViewById(R.id.subscriptButton);
+        superscriptButton = (Button) v.findViewById(R.id.superscriptButton);
+        unindentButton = (Button) v.findViewById(R.id.unindentButton);
+        indentButton = (Button) v.findViewById(R.id.indentButton);
+
+        //Set custom text styles for buttons
         underlineButton.setPaintFlags(Paint.UNDERLINE_TEXT_FLAG);
+        strikeThroughButton.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG);
+        SpannableStringBuilder s = new SpannableStringBuilder("X2");
+        s.setSpan(new SubscriptSpan(), 1, 2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        s.setSpan(new RelativeSizeSpan(0.75f), 1, 2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        subcriptButton.setText(s);
+        s = new SpannableStringBuilder("X2");
+        s.setSpan(new SuperscriptSpan(), 1, 2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        s.setSpan(new RelativeSizeSpan(0.75f), 1, 2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        superscriptButton.setText(s);
 
         entryText = (RichEditText) v.findViewById(R.id.newEntryTextView);
-        entryText.setAllButtons(boldButton, italicButton, underlineButton);
-
-        tabButton.setOnClickListener(this);
-        timeButton.setOnClickListener(this);
-        dateButton.setOnClickListener(this);
-        upButton.setOnClickListener(this);
-        downButton.setOnClickListener(this);
+        entryText.setAllButtons(boldButton, italicButton, underlineButton, strikeThroughButton, subcriptButton, superscriptButton, unindentButton, indentButton);
 
         return v;
 
@@ -165,68 +176,6 @@ public class NewEntryFragment extends Fragment implements View.OnClickListener{
                 return super.onOptionsItemSelected(item);
         }
     }
-
-    @Override
-    public void onClick(View v) {
-
-        switch (v.getId()){
-
-            //QUICK TOOL BUTTONS
-            case R.id.tabButton:
-                tabButtonAction();
-                break;
-            case R.id.timeButton:
-                timeButtonAction();
-                break;
-            case R.id.dateButton:
-                dateButtonAction();
-                break;
-            case R.id.scrollUpButton:
-                upButtonAction();
-                break;
-            case R.id.scrollDownButton:
-                downButtonAction();
-                break;
-        }
-    }
-
-    private void tabButtonAction() {
-        int selectionStart = entryText.getSelectionStart();
-        int selectionEnd = entryText.getSelectionEnd();
-        String newText = entryText.getText().insert(entryText.getSelectionStart(), getString(R.string.tabCharacter)).toString();
-        entryText.setText(newText);
-        if (selectionStart != selectionEnd) {
-            entryText.setSelection(selectionStart + 4, selectionEnd);
-        }
-        else{
-            entryText.setSelection(selectionStart);
-        }
-    }
-
-    private void timeButtonAction(){
-        Calendar c = Calendar.getInstance();
-        String date = "<"+c.get(Calendar.HOUR)+":"+c.get(Calendar.MINUTE)+":"+c.get(Calendar.SECOND)+">";
-        String newText = entryText.getText().insert(entryText.getSelectionStart(), date).toString();
-        entryText.setText(newText);
-        entryText.setSelection(entryText.getSelectionStart()+date.length());
-    }
-
-    private void dateButtonAction(){
-        Calendar c = Calendar.getInstance();
-        String time = "<"+c.get(Calendar.MONTH)+"-"+c.get(Calendar.DAY_OF_MONTH)+"-"+c.get(Calendar.YEAR)+">";
-        String newText = entryText.getText().insert(entryText.getSelectionStart(), time).toString();
-        entryText.setText(newText);
-        entryText.setSelection(entryText.getSelectionStart()+time.length());
-    }
-
-    private void upButtonAction(){
-        entryText.setSelection(0);
-    }
-
-    private void downButtonAction(){
-        entryText.setSelection(entryText.getText().length());
-    }
-
 
     /**
      * This interface must be implemented by activities that contain this
