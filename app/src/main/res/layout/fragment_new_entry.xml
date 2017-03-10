@@ -23,107 +23,99 @@
             android:layout_height="match_parent"
             android:orientation="horizontal" >
 
-            <Button
+            <ImageButton
                 android:id="@+id/unindentButton"
                 android:layout_width="@dimen/horizontal_scroll_button_width"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:background="@drawable/custom_button_bordered"
-                android:foreground="@mipmap/ic_unindent"
-                app:srcCompat="@mipmap/ic_unindent" />
+                android:src="@mipmap/ic_unindent" />
 
-            <Button
+            <ImageButton
                 android:id="@+id/indentButton"
                 android:layout_width="@dimen/horizontal_scroll_button_width"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:background="@drawable/custom_button_bordered"
-                android:foreground="@mipmap/ic_indent"
-                app:srcCompat="@mipmap/ic_indent" />
+                android:src="@mipmap/ic_indent" />
 
             <ToggleButton
                 android:id="@+id/boldButton"
                 android:layout_width="@dimen/horizontal_scroll_button_width"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:background="@drawable/custom_togglebutton_bordered"
                 android:fontFamily="serif"
                 android:textColor="@android:color/white"
                 android:textOff="@string/button_bold"
                 android:textOn="@string/button_bold"
+                android:textSize="24sp"
                 android:textStyle="bold" />
 
             <ToggleButton
                 android:id="@+id/italicButton"
                 android:layout_width="@dimen/horizontal_scroll_button_width"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:background="@drawable/custom_togglebutton_bordered"
                 android:fontFamily="serif"
                 android:textColor="@android:color/white"
                 android:textOff="@string/button_italic"
                 android:textOn="@string/button_italic"
+                android:textSize="24sp"
                 android:textStyle="italic" />
 
             <ToggleButton
                 android:id="@+id/underlineButton"
                 android:layout_width="@dimen/horizontal_scroll_button_width"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:background="@drawable/custom_togglebutton_bordered"
                 android:fontFamily="serif"
                 android:textColor="@android:color/white"
                 android:textOff="@string/button_underline"
-                android:textOn="@string/button_underline" />
+                android:textOn="@string/button_underline"
+                android:textSize="24sp" />
 
-            <Button
+            <ImageButton
                 android:id="@+id/foregroundColorButton"
                 android:layout_width="@dimen/horizontal_scroll_button_width"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:background="@drawable/custom_button_bordered"
-                android:foreground="@mipmap/ic_textcolor"
-                app:srcCompat="@mipmap/ic_indent" />
+                android:src="@mipmap/ic_textcolor" />
 
-            <Button
+            <ImageButton
                 android:id="@+id/backgroundColorButton"
                 android:layout_width="@dimen/horizontal_scroll_button_width"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:background="@drawable/custom_button_bordered"
-                android:foreground="@mipmap/ic_textcolor"
-                app:srcCompat="@mipmap/ic_indent" />
+                android:src="@mipmap/ic_highlighter" />
 
             <ToggleButton
                 android:id="@+id/strikeThroughButton"
                 android:layout_width="@dimen/horizontal_scroll_button_width"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:background="@drawable/custom_togglebutton_bordered"
                 android:fontFamily="serif"
                 android:textColor="@android:color/white"
                 android:textOff="@string/button_strikethrough"
-                android:textOn="@string/button_strikethrough" />
+                android:textOn="@string/button_strikethrough"
+                android:textSize="24sp" />
 
             <Button
                 android:id="@+id/subscriptButton"
                 android:layout_width="@dimen/horizontal_scroll_button_width"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:background="@drawable/custom_button_bordered"
                 android:fontFamily="serif"
                 android:textAllCaps="false"
-                android:textColor="@android:color/white" />
+                android:textColor="@android:color/white"
+                android:textSize="24sp" />
 
             <Button
                 android:id="@+id/superscriptButton"
                 android:layout_width="@dimen/horizontal_scroll_button_width"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:background="@drawable/custom_button_bordered"
                 android:fontFamily="serif"
                 android:textAllCaps="false"
-                android:textColor="@android:color/white" />
+                android:textColor="@android:color/white"
+                android:textSize="24sp" />
 
         </LinearLayout>
     </HorizontalScrollView>
@@ -156,10 +148,9 @@
                     android:id="@+id/newEntryTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:autoText="false"
                     android:fontFamily="sans-serif"
                     android:gravity="top|start"
-                    android:inputType="textCapSentences|textAutoCorrect|textAutoComplete|textMultiLine"
+                    android:inputType="textCapSentences|textAutoCorrect|textAutoComplete|textMultiLine|textNoSuggestions"
                     android:text="@string/large_text"
                     android:textColor="@android:color/white"
                     android:textSize="20sp" />

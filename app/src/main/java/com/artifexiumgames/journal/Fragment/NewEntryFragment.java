@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ToggleButton;
 
 import com.artifexiumgames.journal.RichEditText.RichEditText;
@@ -55,10 +56,10 @@ public class NewEntryFragment extends Fragment {
     private ToggleButton strikeThroughButton;
     private Button subcriptButton;
     private Button superscriptButton;
-    private Button indentButton;
-    private Button unindentButton;
-    private Button textColorButton;
-    private Button backgroundButton;
+    private ImageButton indentButton;
+    private ImageButton unindentButton;
+    private ImageButton textColorButton;
+    private ImageButton backgroundButton;
     private RichEditText entryText;
 
     private NewEntryFragmentListner mListener;
@@ -106,10 +107,10 @@ public class NewEntryFragment extends Fragment {
         strikeThroughButton = (ToggleButton) v.findViewById(R.id.strikeThroughButton);
         subcriptButton = (Button) v.findViewById(R.id.subscriptButton);
         superscriptButton = (Button) v.findViewById(R.id.superscriptButton);
-        unindentButton = (Button) v.findViewById(R.id.unindentButton);
-        indentButton = (Button) v.findViewById(R.id.indentButton);
-        textColorButton = (Button) v.findViewById(R.id.foregroundColorButton);
-        backgroundButton = (Button) v.findViewById(R.id.backgroundColorButton);
+        unindentButton = (ImageButton) v.findViewById(R.id.unindentButton);
+        indentButton = (ImageButton) v.findViewById(R.id.indentButton);
+        textColorButton = (ImageButton) v.findViewById(R.id.foregroundColorButton);
+        backgroundButton = (ImageButton) v.findViewById(R.id.backgroundColorButton);
 
         //Set custom text styles for buttons
         underlineButton.setPaintFlags(Paint.UNDERLINE_TEXT_FLAG);
