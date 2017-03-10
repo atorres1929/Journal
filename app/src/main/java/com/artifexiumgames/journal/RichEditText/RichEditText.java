@@ -108,8 +108,6 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
     protected View backgroundColorButton;
     protected ColorDrawable currentTextBackgroundColor;
     protected ArrayList<ColorString> colorList;
-    private Dialog colorChooserDialog;
-    private Dialog customColorChooserDialog;
 
     //Settings
     protected float relativeSize;
@@ -164,7 +162,6 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
         } catch (IOException ex){
             Log.wtf(TAG, "Default Settings for ColorString incorrect");
         }
-        loadColorChooserDialog();
     }
 
     /**
@@ -282,15 +279,13 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
             getText().setSpan(new StrikethroughSpan(), start, start + count, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         if (currentTextForegroundColor != null) {
-            if (currentTextForegroundColor.getColor() != getTextColor().getColor()) {
-                getText().setSpan(new ForegroundColorSpan(currentTextForegroundColor.getColor()), start, start + count, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+            if (getTextColors().getDefaultColor() != currentTextForegroundColor.getColor()) {
+                getText().setSpan(new ForegroundColorSpan(currentTextForegroundColor.getColor()), start, start + count, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
         }
         if (currentTextBackgroundColor != null) {
-            if (currentTextBackgroundColor.getColor() != getCurrentTextBackgroundColor().getColor()) {
-                getText().setSpan(new BackgroundColorSpan(currentTextBackgroundColor.getColor()), start, start + count, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-            }
-        }//double if due to NullPointerException if OR is done
+            getText().setSpan(new BackgroundColorSpan(currentTextBackgroundColor.getColor()), start, start + count, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
     }
 
     /**
@@ -510,33 +505,31 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
 
     /**
      * Sets the text foreground color according to what the user picks
-     * @see #loadColorChooserDialog()
+     * @see #loadColorChooserDialog(Class)
      */
     public void textForegroundColorAction(){
-        colorChooserDialog.show();
-        setCurrentTextForegroundColor();
+        loadColorChooserDialog(ForegroundColorSpan.class);
     }
 
     /**
      * Sets the text background color according to what the user picks
-     * @see #loadColorChooserDialog()
+     * @see #loadColorChooserDialog(Class)
      */
     public void textBackgroundColorAction(){
-        colorChooserDialog.show();
-        setCurrentTextBackgroundColor();
+        loadColorChooserDialog(BackgroundColorSpan.class);
     }
 
     /**
      * Necessary to deal with static classes within
-     * @see #loadColorChooserDialog()
+     * @see #loadColorChooserDialog(Class)
      */
     protected static ColorDrawable currentColor;
 
-    /**
+    /** //TODO this is attrocious, fix it
      * //TODO document with flow chart
      * @return either null or a ColorDrawable with the currently selected color
      */
-    protected void loadColorChooserDialog(){
+    protected void loadColorChooserDialog(final Class c){
 
         final ArrayAdapter<ColorString> listArray = new ArrayAdapter<ColorString> (getContext(), android.R.layout.simple_list_item_1, colorList) {
             @Override
@@ -586,6 +579,12 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
                     ColorString newColor = new ColorString(colorTitle.getText().toString(), colorHex.getText().toString());
                     colorList.add(0, newColor);
                     currentColor = new ColorDrawable(newColor.getHex());
+                    if (c == ForegroundColorSpan.class){
+                        setCurrentTextForegroundColor();
+                    }
+                    else{
+                        setCurrentTextBackgroundColor();
+                    }
                     dialog.dismiss();
                 } catch (IOException e) {
                     AlertDialog thisDialog = (AlertDialog) dialog;
@@ -607,7 +606,7 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
                 ((AlertDialog) dialog).show();
             }
         });
-        customColorChooserDialog = builder.create();
+        final Dialog customColorChooserDialog = builder.create();
 
         //Main Dialog (Color Chooser Dialog)
         builder = new AlertDialog.Builder(getContext());
@@ -618,6 +617,12 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
                 ColorString color = colorList.remove(which);
                 colorList.add(0, color);
                 currentColor = new ColorDrawable(color.getHex());
+                if (c == ForegroundColorSpan.class){
+                    setCurrentTextForegroundColor();
+                }
+                else{
+                    setCurrentTextBackgroundColor();
+                }
                 dialog.dismiss();
             }
         });
@@ -625,6 +630,12 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 currentColor = null;
+                if (c == ForegroundColorSpan.class){
+                    setCurrentTextForegroundColor();
+                }
+                else{
+                    setCurrentTextBackgroundColor();
+                }
                 dialog.dismiss();
             }
         });
@@ -635,7 +646,7 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
                 dialog.dismiss();
             }
         });
-        colorChooserDialog = builder.create();
+        builder.show();
 
     }
 
@@ -662,10 +673,6 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
 
     protected void pageDownAction(){
         setSelection(getText().length());
-    }
-
-    public ColorDrawable getTextColor(){
-        return currentTextForegroundColor;
     }
 
     public ColorDrawable getCurrentTextBackgroundColor(){
@@ -760,7 +767,7 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
 
     protected void setCurrentTextForegroundColor(){
         this.currentTextForegroundColor = currentColor;
-        this.backgroundColorButton.setBackground(currentColor);
+        this.textColorButton.setBackground(currentColor);
     }
 
     /**
