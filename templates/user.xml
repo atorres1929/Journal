@@ -1,0 +1,7 @@
+<templateSet group="user">
+  <template name="/*" value="/*&#10; * $END$&#10; */" shortcut="ENTER" description="Block Comments with * EVERYWHERE" toReformat="false" toShortenFQNames="true">
+    <context>
+      <option name="JAVA_CODE" value="true" />
+    </context>
+  </template>
+</templateSet>

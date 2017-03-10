@@ -1,0 +1,5 @@
+<templateSet group="AndroidComments">
+  <template name="/*" value="/*&#10; * $END$&#10; */" shortcut="ENTER" description="block comment with stars EVERYWHERE" toReformat="true" toShortenFQNames="true">
+    <context />
+  </template>
+</templateSet>
