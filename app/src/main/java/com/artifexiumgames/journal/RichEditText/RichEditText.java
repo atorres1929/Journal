@@ -2,22 +2,23 @@ package com.artifexiumgames.journal.RichEditText;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
 import android.text.InputType;
-import android.text.Layout;
 import android.text.ParcelableSpan;
-import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextWatcher;
-import android.text.style.ForegroundColorSpan;
 import android.text.style.MetricAffectingSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StrikethroughSpan;
@@ -27,24 +28,21 @@ import android.text.style.SuperscriptSpan;
 import android.text.style.UnderlineSpan;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import com.artifexiumgames.journal.R;
-
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import static android.R.id.list;
+import static android.R.id.text1;
 
 //TODO left, right, center align buttons
 //TODO foreground, background color buttons
@@ -107,9 +105,9 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
     protected View unindentButton;
     protected View textColorButton;
     protected ColorDrawable currentTextColor;
-    protected View backgroundButton;
+    protected View backgroundColorButton;
     protected ColorDrawable currentBackgroundColor;
-    protected String[] colorList;
+    protected ArrayList<ColorString> colorList;
 
     //Settings
     protected float relativeSize;
@@ -150,10 +148,22 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
         addTextChangedListener(this);
         relativeSize = 0.5f;
         numTabs = 4;
-        colorList = new String[]{"Black - #000000", "White - #FFFFFF",
-                "Green - #00800", "Blue - #0000FF", "Purple - #800080",
-                "Red - #FF0000", "Orange - #FFA500", "Yellow - #FFFF00",
-                "Hot Pink - #FF69B4", "Light Blue - #00FFF9", "Brown - #A52A2A"};
+        colorList = new ArrayList<>();
+        try {
+            colorList.add(new ColorString("Black", "#000000"));
+            colorList.add(new ColorString("White", "#FFFFFF"));
+            colorList.add(new ColorString("Green", "#008000"));
+            colorList.add(new ColorString("Blue", "#0000FF"));
+            colorList.add(new ColorString("Purple", "#800080"));
+            colorList.add(new ColorString("Red", "#FF0000"));
+            colorList.add(new ColorString("Orange", "#FFA500"));
+            colorList.add(new ColorString("Yellow", "#FFFF00"));
+            colorList.add(new ColorString("Hot Pink", "#FF69B4"));
+            colorList.add(new ColorString("Light Blue", "#00FFF9"));
+            colorList.add(new ColorString("Brown", "#A52A2A"));
+        } catch (IOException ex){
+            Log.wtf(TAG, "Default Settings for ColorString incorrect");
+        }
     }
 
     @Override
@@ -287,11 +297,20 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
             unindentAction();
         }
         else if (id == textColorButton.getId()){
-            textColorAction();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                textColorAction();
+            }
+            else {
+                Log.e(TAG, "You can't use the Foreground color options unless the API is 23!");
+            }
+        }
+        else if (id == backgroundColorButton.getId()){
+            backgroundColorAction();
         }
         else{
             Log.e(TAG, "You forgot to assign a button!");
         }
+
 
     }
 
@@ -466,35 +485,113 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
     }
 
     //TODO Document Me!
+    @RequiresApi(api = Build.VERSION_CODES.M)
     public void textColorAction(){
-        final int selectionStart = getSelectionStart();
-        final int selectionEnd = getSelectionEnd();
-        int[] hexColors = new int[colorList.length];
-        SpannableString[] spannedColorList = new SpannableString[colorList.length];
-        for (int i = 0; i < colorList.length; i ++){
-            String color = colorList[i];
-            String hex = color.substring(color.indexOf('#'), color.length() - 1);
-            hexColors[i] = Integer.decode(hex);
-            spannedColorList[i] = new SpannableString(color);
-            spannedColorList[i].setSpan(new ForegroundColorSpan(hexColors[i]), 0, color.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+    }
+
+    protected void backgroundColorAction(){
+
+    }
+
+    protected ColorDrawable loadColorChooserDialog(){
+        final ColorDrawable chosenColor = new ColorDrawable();
+
+        final int[] hexColors = new int[colorList.size()];
+        for (int i = 0; i < colorList.size(); i ++){
+            ColorString colorString = colorList.get(i);
+            hexColors[i] = Color.parseColor(colorString.getColor());
         }
-        SpannedAdapter listArray = new SpannedAdapter(getContext(), spannedColorList);
+        final ArrayAdapter<ColorString> listArray = new ArrayAdapter<ColorString> (getContext(), android.R.layout.simple_list_item_1, colorList) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                TextView tv = (TextView) view.findViewById(text1);
+
+                int color = hexColors[position];
+                tv.setBackgroundColor(color);
+
+                //Convert the color to RGB to decide whether white or black contrasts better with the color
+                int r = (color >> 16) & 0xFF;
+                int g = (color >> 8) & 0xFF;
+                int b = (color >> 0) & 0xFF;
+                if ((r*0.299 + g*0.587 + b*0.114) > 186){
+                    tv.setTextColor(Color.BLACK);
+                }
+                else {
+                    tv.setTextColor(Color.WHITE);
+                }
+
+                return view;
+            }
+        };
+
+
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Choose Color for Text: " + relativeSize);
-        builder.setAdapter(listArray, new DialogInterface.OnClickListener() {
+
+        //Optional Dialog (Custom Color Dialog)
+        LinearLayout layout = new LinearLayout(getContext());
+        LinearLayout.LayoutParams layoutParams= new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        layout.setLayoutParams(layoutParams);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        final EditText colorTitle = new EditText(layout.getContext());
+        colorTitle.setLayoutParams(layoutParams);
+        colorTitle.setHint("White");
+        layout.addView(colorTitle);
+        final EditText colorHex = new EditText(layout.getContext());
+        colorHex.setLayoutParams(layoutParams);
+        colorHex.setHint("#FFFFFF");
+        layout.addView(colorHex);
+        builder.setView(layout);
+        builder.setTitle("Enter Color in Hex Format");
+        builder.setPositiveButton("Enter", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                getText().setSpan(new ForegroundColorSpan(Color.YELLOW), selectionStart, selectionEnd, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                try {
+                    colorList.add(0, new ColorString(colorTitle.getText().toString(), colorHex.getText().toString()));
+                    dialog.dismiss();
+                } catch (IOException e) {
+                    AlertDialog thisDialog = (AlertDialog) dialog;
+                    thisDialog.setTitle("Incorrect Format");
+                    thisDialog.setIcon(android.R.drawable.ic_dialog_alert);
+                    thisDialog.cancel();
+                }
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
+                dialog.dismiss();
             }
         });
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                ((AlertDialog) dialog).show();
+            }
+        });
+        final Dialog customColorDialog = builder.create();
+
+        //Main Dialog (Color Chooser Dialog)
+        builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Choose Color for Text: " + relativeSize);
+        builder.setAdapter(listArray, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                ColorString color = colorList.remove(which);
+                colorList.add(0, color);
+                chosenColor.setColor(Color.parseColor(color.colorHex));
+            }
+        });
+        builder.setNeutralButton("Enter Custom Color Code", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                customColorDialog.show();
+            }
+        });
+        builder.show();
+
+        return chosenColor;
     }
 
     protected void insertTimeAction(){
@@ -544,7 +641,7 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
             setUnindentButton(unindentButton);
             setIndentButton(indentButton);
             setTextColorButton(textColorButton);
-            setBackgroundButton(backgroundButton);
+            setBackgroundColorButton(backgroundButton);
         } catch (NullPointerException ex) {
             throw new NullPointerException("Remember, you can set buttons individually instead of setting them all at the same time");
         }
@@ -595,18 +692,19 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
         this.textColorButton.setOnClickListener(this);
     }
 
-    public void setBackgroundButton(View button){
-        this.backgroundButton = button;
-        this.backgroundButton.setOnClickListener(this);
+    public void setBackgroundColorButton(View button){
+        this.backgroundColorButton = button;
+        this.backgroundColorButton.setOnClickListener(this);
     }
 
     public ColorDrawable getTextColor(){
         return currentTextColor;
     }
 
-    public void setTextColor(ColorDrawable color){
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public void setCurrentTextColor(ColorDrawable color){
         this.currentTextColor = color;
-        this.textColorButton.setForeground(currentTextColor);
+        this.textColorButton.setForegroundTintList(new ColorStateList(new int[][]{{}}, new int[]{currentTextColor.getColor()}));
     }
 
     public ColorDrawable getCurrentBackgroundColor(){
@@ -615,14 +713,14 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
 
     public void setCurrentBackgroundColor(ColorDrawable color){
         this.currentBackgroundColor = color;
-        this.backgroundButton.setBackground(currentBackgroundColor);
+        this.backgroundColorButton.setBackground(currentBackgroundColor);
     }
 
-    public void setColorList(String[] colors){
+    public void setColorList(ArrayList<ColorString> colors){
         colorList = colors;
     }
 
-    public String[] getColorList(){
+    public ArrayList<ColorString> getColorList(){
         return colorList;
     }
 
@@ -670,62 +768,38 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
      * @see #onSelectionChanged(int, int)
      */
     @SuppressLint("ParcelCreator")
-    protected class MyUnderlineSpan extends UnderlineSpan {
+    public class MyUnderlineSpan extends UnderlineSpan {
 
     }
 
-    /**
-     * Code adapted from http://stackoverflow.com/questions/4580664/how-put-spanned-into-list-setadapter
-     * Credit where credit is due.
-     * <br>
-     * It's basically a custom adapter to allow you to have different colors for each item in an AlertDialog
-     */
-    protected static class SpannedAdapter extends BaseAdapter {
+    public static class ColorString {
 
-        private LayoutInflater inflater;
-        private SpannableString[] list;
-
-        protected SpannedAdapter(Context context, SpannableString[] articleList) {
-            inflater = LayoutInflater.from(context);
-            list = articleList;
-        }
-
-        @Override
-        public int getCount() {
-            return list.length;
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return list[position];
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            ViewHolder holder;
-            if (convertView == null) {
-                convertView = inflater.inflate(android.R.layout.simple_spinner_item, null);
-                holder = new ViewHolder();
-                holder.text = new TextView(convertView.getContext());
-
-                convertView.setTag(holder);
-            } else {
-                holder = (ViewHolder) convertView.getTag();
+        private String colorString;
+        private String title;
+        private String colorHex;
+        public ColorString(String title, String color) throws IOException{
+            title = title.trim();
+            color = color.trim();
+            if (color.length() != 7 || !color.startsWith("#")){
+                throw new IOException("The color must be 7 characters long!" +
+                        "\nFormat: #000000");
             }
-
-            holder.text.setText(list[position]);
-
-            return convertView;
+            this.title = title;
+            this.colorHex = color;
+            colorString = title + " - " + color;
         }
 
-        protected static class ViewHolder{
-            protected TextView text;
+        public String getTitle(){return title;}
+
+        public String getColor(){return colorHex;}
+
+        public String getColorString(){return colorString;}
+
+        @Override
+        public String toString(){
+            return colorString;
         }
+
     }
 
 
