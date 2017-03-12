@@ -2,13 +2,14 @@ package com.artifexiumgames.journal.Fragment;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.graphics.Paint;
-import android.media.Image;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.SubscriptSpan;
 import android.text.style.SuperscriptSpan;
@@ -24,8 +25,6 @@ import android.widget.ToggleButton;
 
 import com.artifexiumgames.journal.RichEditText.RichEditText;
 import com.artifexiumgames.journal.R;
-
-import java.util.Calendar;
 
 
 /**
@@ -57,8 +56,10 @@ public class NewEntryFragment extends Fragment {
     private ToggleButton strikeThroughButton;
     private Button subcriptButton;
     private Button superscriptButton;
-    private Button indentButton;
-    private Button unindentButton;
+    private ImageButton indentButton;
+    private ImageButton unindentButton;
+    private ImageButton textColorButton;
+    private ImageButton backgroundButton;
     private RichEditText entryText;
 
     private NewEntryFragmentListner mListener;
@@ -106,8 +107,10 @@ public class NewEntryFragment extends Fragment {
         strikeThroughButton = (ToggleButton) v.findViewById(R.id.strikeThroughButton);
         subcriptButton = (Button) v.findViewById(R.id.subscriptButton);
         superscriptButton = (Button) v.findViewById(R.id.superscriptButton);
-        unindentButton = (Button) v.findViewById(R.id.unindentButton);
-        indentButton = (Button) v.findViewById(R.id.indentButton);
+        unindentButton = (ImageButton) v.findViewById(R.id.unindentButton);
+        indentButton = (ImageButton) v.findViewById(R.id.indentButton);
+        textColorButton = (ImageButton) v.findViewById(R.id.foregroundColorButton);
+        backgroundButton = (ImageButton) v.findViewById(R.id.backgroundColorButton);
 
         //Set custom text styles for buttons
         underlineButton.setPaintFlags(Paint.UNDERLINE_TEXT_FLAG);
@@ -122,7 +125,10 @@ public class NewEntryFragment extends Fragment {
         superscriptButton.setText(s);
 
         entryText = (RichEditText) v.findViewById(R.id.newEntryTextView);
-        entryText.setAllButtons(boldButton, italicButton, underlineButton, strikeThroughButton, subcriptButton, superscriptButton, unindentButton, indentButton);
+        entryText.setAllButtons(boldButton, italicButton, underlineButton, strikeThroughButton,
+                                subcriptButton, superscriptButton,
+                                unindentButton, indentButton,
+                textColorButton, backgroundButton);
 
         return v;
 

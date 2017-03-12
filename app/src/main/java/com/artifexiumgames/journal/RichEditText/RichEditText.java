@@ -2,18 +2,23 @@ package com.artifexiumgames.journal.RichEditText;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.ParcelableSpan;
-import android.text.SpannableStringBuilder;
+import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextWatcher;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.MetricAffectingSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StrikethroughSpan;
@@ -24,12 +29,20 @@ import android.text.style.UnderlineSpan;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
+
+import static android.R.id.text1;
 
 //TODO left, right, center align buttons
 //TODO foreground, background color buttons
@@ -90,14 +103,15 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
     protected View superscriptButton;
     protected View indentButton;
     protected View unindentButton;
-    protected View foregroundButton;
-    protected ColorDrawable currentForegroundColor;
-    protected View backgroundButton;
-    protected ColorDrawable currentBackgroundColor;
+    protected View textColorButton;
+    protected ColorDrawable currentTextForegroundColor;
+    protected View backgroundColorButton;
+    protected ColorDrawable currentTextBackgroundColor;
+    protected ArrayList<ColorString> colorList;
 
     //Settings
-    protected float relativeSize = 0.5f;
-    protected int numTabs = 4;
+    protected float relativeSize;
+    protected int numTabs;
 
     /**
      * Default Constructor needed to extend {@link EditText}
@@ -122,10 +136,50 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
     }
 
     /**
-     * Adds this class as it's own text listener
+     * Adds this class as it's own text listener and initializes the default settings
+     * for:
+     * <ul>
+     *     <li>Relative Size (subscript/superscript)</li>
+     *     <li>Number of Spaces in a tab</li>
+     *     <li>The colors you can choose from in the text color or background color dialog</li>
+     * </ul>
      */
     protected void init() {
         addTextChangedListener(this);
+        relativeSize = 0.5f;
+        numTabs = 4;
+        colorList = new ArrayList<>();
+        try {
+            colorList.add(new ColorString("Green", "#008000"));
+            colorList.add(new ColorString("Blue", "#0000FF"));
+            colorList.add(new ColorString("Purple", "#800080"));
+            colorList.add(new ColorString("Red", "#FF0000"));
+            colorList.add(new ColorString("Orange", "#FFA500"));
+            colorList.add(new ColorString("Yellow", "#FFFF00"));
+            colorList.add(new ColorString("Hot Pink", "#FF69B4"));
+            colorList.add(new ColorString("Light Blue", "#00FFF9"));
+            colorList.add(new ColorString("Brown", "#A52A2A"));
+        } catch (IOException ex){
+            Log.wtf(TAG, "Default Settings for ColorString incorrect");
+        }
+    }
+
+    /**
+     * Set up the default settings of the editor
+     * @param colors The colors that will show in the dialog to choose colors
+     * @param numTabs The number of spaces in a tab
+     * @param relativeSize The relative size of subscript and superscript text
+     */
+    protected void setSettings(int defaultTextColor, int defaultBackgroundColor, ArrayList<ColorString> colors, int numTabs, int relativeSize){
+        addTextChangedListener(this);
+        setTextColor(defaultTextColor);
+        setBackgroundColor(defaultBackgroundColor);
+        setColorList(colors);
+        setNumTabs(numTabs);
+        setRelativeSize(relativeSize);
+        //TODO set line spacing
+        //TODO set font size
+        //TODO set font family
     }
 
     @Override
@@ -224,6 +278,14 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
         if (strikeThroughButton != null && strikeThroughButton.isChecked()) {
             getText().setSpan(new StrikethroughSpan(), start, start + count, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
+        if (currentTextForegroundColor != null) {
+            if (getTextColors().getDefaultColor() != currentTextForegroundColor.getColor()) {
+                getText().setSpan(new ForegroundColorSpan(currentTextForegroundColor.getColor()), start, start + count, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+        }
+        if (currentTextBackgroundColor != null) {
+            getText().setSpan(new BackgroundColorSpan(currentTextBackgroundColor.getColor()), start, start + count, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
     }
 
     /**
@@ -258,12 +320,16 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
         else if (id == unindentButton.getId()){
             unindentAction();
         }
-        else if (id == foregroundButton.getId()){
-            foregroundColorAction();
+        else if (id == textColorButton.getId()){
+            textForegroundColorAction();
+        }
+        else if (id == backgroundColorButton.getId()){
+            textBackgroundColorAction();
         }
         else{
             Log.e(TAG, "You forgot to assign a button!");
         }
+
 
     }
 
@@ -361,10 +427,10 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                SpannableStringBuilder builder = new SpannableStringBuilder(input.getText());
-                builder.setSpan(span, 0, input.getText().length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                builder.setSpan(new RelativeSizeSpan(relativeSize), 0, input.getText().length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                getText().insert(getSelectionStart(), builder);
+                SpannableString spannedText = new SpannableString(input.getText());
+                spannedText.setSpan(span, 0, input.getText().length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                spannedText.setSpan(new RelativeSizeSpan(relativeSize), 0, input.getText().length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                getText().insert(getSelectionStart(), spannedText);
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -437,9 +503,151 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
         }
     }
 
-    //TODO Document Me!
-    public void foregroundColorAction(){
-        //TODO Implement me!
+    /**
+     * Sets the text foreground color according to what the user picks
+     * @see #loadColorChooserDialog(Class)
+     */
+    public void textForegroundColorAction(){
+        loadColorChooserDialog(ForegroundColorSpan.class);
+    }
+
+    /**
+     * Sets the text background color according to what the user picks
+     * @see #loadColorChooserDialog(Class)
+     */
+    public void textBackgroundColorAction(){
+        loadColorChooserDialog(BackgroundColorSpan.class);
+    }
+
+    /**
+     * Necessary to deal with static classes within
+     * @see #loadColorChooserDialog(Class)
+     */
+    protected static ColorDrawable currentColor;
+
+    /** //TODO this is attrocious, fix it
+     * //TODO document with flow chart
+     * @return either null or a ColorDrawable with the currently selected color
+     */
+    protected void loadColorChooserDialog(final Class c){
+
+        final ArrayAdapter<ColorString> listArray = new ArrayAdapter<ColorString> (getContext(), android.R.layout.simple_list_item_1, colorList) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                TextView tv = (TextView) view.findViewById(text1);
+
+                int color = this.getItem(position).getHex();
+                tv.setBackgroundColor(color);
+
+                //Convert the color to RGB to decide whether white or black contrasts better with the color
+                int r = (color >> 16) & 0xFF;
+                int g = (color >> 8) & 0xFF;
+                int b = (color >> 0) & 0xFF;
+                if ((r*0.299 + g*0.587 + b*0.114) > 186){
+                    tv.setTextColor(Color.BLACK);
+                }
+                else {
+                    tv.setTextColor(Color.WHITE);
+                }
+
+                return view;
+            }
+        };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+
+        //Optional Dialog (Custom Color Dialog)
+        LinearLayout layout = new LinearLayout(getContext());
+        LinearLayout.LayoutParams layoutParams= new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        layout.setLayoutParams(layoutParams);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        final EditText colorTitle = new EditText(layout.getContext());
+        colorTitle.setLayoutParams(layoutParams);
+        colorTitle.setHint("White");
+        layout.addView(colorTitle);
+        final EditText colorHex = new EditText(layout.getContext());
+        colorHex.setLayoutParams(layoutParams);
+        colorHex.setHint("#FFFFFF");
+        layout.addView(colorHex);
+        builder.setView(layout);
+        builder.setTitle("Enter Color in Hex Format");
+        builder.setPositiveButton("Enter", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                try {
+                    ColorString newColor = new ColorString(colorTitle.getText().toString(), colorHex.getText().toString());
+                    colorList.add(0, newColor);
+                    currentColor = new ColorDrawable(newColor.getHex());
+                    if (c == ForegroundColorSpan.class){
+                        setCurrentTextForegroundColor();
+                    }
+                    else{
+                        setCurrentTextBackgroundColor();
+                    }
+                    dialog.dismiss();
+                } catch (IOException e) {
+                    AlertDialog thisDialog = (AlertDialog) dialog;
+                    thisDialog.setTitle("Incorrect Format");
+                    thisDialog.setIcon(android.R.drawable.ic_dialog_alert);
+                    thisDialog.cancel();
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                ((AlertDialog) dialog).show();
+            }
+        });
+        final Dialog customColorChooserDialog = builder.create();
+
+        //Main Dialog (Color Chooser Dialog)
+        builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Choose Color for Text: " + relativeSize);
+        builder.setAdapter(listArray, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                ColorString color = colorList.remove(which);
+                colorList.add(0, color);
+                currentColor = new ColorDrawable(color.getHex());
+                if (c == ForegroundColorSpan.class){
+                    setCurrentTextForegroundColor();
+                }
+                else{
+                    setCurrentTextBackgroundColor();
+                }
+                dialog.dismiss();
+            }
+        });
+        builder.setNegativeButton("Default Color", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                currentColor = null;
+                if (c == ForegroundColorSpan.class){
+                    setCurrentTextForegroundColor();
+                }
+                else{
+                    setCurrentTextBackgroundColor();
+                }
+                dialog.dismiss();
+            }
+        });
+        builder.setNeutralButton("Enter Custom Color Code", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                customColorChooserDialog.show();
+                dialog.dismiss();
+            }
+        });
+        builder.show();
+
     }
 
     protected void insertTimeAction(){
@@ -467,18 +675,29 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
         setSelection(getText().length());
     }
 
+    public ColorDrawable getCurrentTextBackgroundColor(){
+        return currentTextBackgroundColor;
+    }
+
+    /**
+     * @return The list of colors that will be displayed to the user upon request.
+     *         If the user has set custom colors, then the list will return those as well
+     *         as they are contained in the same list as the default colors.
+     */
+    public ArrayList<ColorString> getColorList(){
+        return colorList;
+    }
+
     /**
      * References all buttons required for the full functionality of this text editor and sets their
-     * on click listener to be this editor.
-     * <br>
-     * <b>To add your own functionality to the buttons when clicked:</b> simply call
-     * {@link #onClick(View)} within your own OnClickListener's method.
+     * on click listener to be this editor. The foreground button will not work unless API is 23 or higher
      */
 
+    @NonNull
     public void setAllButtons(ToggleButton boldButton, ToggleButton italicButton, ToggleButton underlineButton, ToggleButton strikeThroughButton,
                               View subscriptButton, View superscriptButton,
-                              View unindentButton, View indentButton) {
-        try {
+                              View unindentButton, View indentButton,
+                              View textColorButton, View backgroundButton) {
             setBoldButton(boldButton);
             setItalicButton(italicButton);
             setUnderlineButton(underlineButton);
@@ -487,9 +706,8 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
             setSuperscriptButton(superscriptButton);
             setUnindentButton(unindentButton);
             setIndentButton(indentButton);
-        } catch (NullPointerException ex) {
-            Log.e(TAG, "Remember, you can set buttons individually instead of setting them all at the same time", ex);
-        }
+            setTextColorButton(textColorButton);
+            setBackgroundColorButton(backgroundButton);
     }
 
     public void setBoldButton(ToggleButton button) {
@@ -532,49 +750,44 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
         this.unindentButton.setOnClickListener(this);
     }
 
-    public void setForegroundButton(View button){
-        this.foregroundButton = button;
-        this.foregroundButton.setOnClickListener(this);
+    public void setTextColorButton(View button){
+        this.textColorButton = button;
+        this.textColorButton.setOnClickListener(this);
     }
 
-    public ColorDrawable getCurrentForegroundColor(){
-        return currentForegroundColor;
+    public void setBackgroundColorButton(View button){
+        this.backgroundColorButton = button;
+        this.backgroundColorButton.setOnClickListener(this);
     }
 
-    public void setCurrentForegroundColor(ColorDrawable color){
-        this.currentForegroundColor = color;
-        this.foregroundButton.setForeground(currentForegroundColor);
+    protected void setCurrentTextBackgroundColor(){
+        this.currentTextBackgroundColor = currentColor;
+        this.backgroundColorButton.setBackground(currentColor);
     }
 
-    public void setBackgroundButton(View button){
-        this.backgroundButton = button;
-        this.backgroundButton.setOnClickListener(this);
-    }
-
-    public ColorDrawable getCurrentBackgroundColor(){
-        return currentBackgroundColor;
-    }
-
-    public void setCurrentBackgroundColor(ColorDrawable color){
-        this.currentBackgroundColor = color;
-        this.backgroundButton.setBackground(currentBackgroundColor);
-    }
-
-    protected void settings(){
-        //TODO for indent - set spacing
-        //TODO set line spacing
-        //TODO set font size
-        //TODO set font family
-        //TODO set relative size for super/subscript
+    protected void setCurrentTextForegroundColor(){
+        this.currentTextForegroundColor = currentColor;
+        this.textColorButton.setBackground(currentColor);
     }
 
     /**
-     * Adds a SelectionChangeListener to this editor
-     *
-     * @param onSelectionChangeListener the listener to be added
+     * Set the colors available to the user without having to add their own. Note that setting
+     * this list will wipe any colors the user has added themselves. To add to the list without
+     * removing their settings, call the list with {@link #getColorList()} then add to it.
+     * @param colors array of {@link ColorString} that will be used to give the user a default
+     *               set of colors
+     * @see ColorString
      */
-    public void addOnSelectionChangeListener(OnSelectionChangeListener onSelectionChangeListener) {
-        this.onSelectionChangeListener = onSelectionChangeListener;
+    public void setColorList(ArrayList<ColorString> colors){
+        colorList = colors;
+    }
+
+    /**
+     * Set the number of spaces in a tab
+     * @param numTabs the number of spaces in a tab
+     */
+    public void setNumTabs(int numTabs){
+        this.numTabs = numTabs;
     }
 
     /**
@@ -587,6 +800,16 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
      */
     public void setRelativeSize(float f){
         relativeSize = f;
+    }
+
+    /**
+     * Adds a SelectionChangeListener to this editor
+     *
+     * @param onSelectionChangeListener the listener to be added
+     * @see #onSelectionChanged(int, int)
+     */
+    public void addOnSelectionChangeListener(OnSelectionChangeListener onSelectionChangeListener) {
+        this.onSelectionChangeListener = onSelectionChangeListener;
     }
 
     /**
@@ -608,5 +831,58 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
 
     }
 
+    /**
+     * A simple class that holds the information for the name of a color and it's hex code.
+     * Will throw an {@link IOException} if information is put in incorrectly
+     * @see #loadColorChooserDialog()
+     */
+    public static class ColorString {
+
+        private int hex;
+        private String colorString;
+
+        /**
+         * The format for entering data into the class is as follows:
+         * <p>
+         *     <b>Title:</b>
+         *     <br>
+         *     The title can be a string of any length, however, keep in mind that there is a
+         *     finite amount of space in the dialog provided by {@link #loadColorChooserDialog()}.
+         * </p>
+         * <p>
+         *     <b>Color:</b>
+         *     <br>
+         *     The color must be a properly formatted hex value.
+         *     Example: "#ffffff"
+         * </p>
+         * This would give a color of white.
+         *
+         * @param title The title of the color being supplied
+         * @param color The hex code of the color
+         * @throws IOException
+         * @see #loadColorChooserDialog()
+         */
+        public ColorString(String title, String color) throws IOException{
+            color = color.trim();
+            try{
+                hex = Color.parseColor(color);
+            }catch (NumberFormatException ex){
+                throw new IOException("The string " +color+ " is not a properly formatted hex code");
+            }
+            title = title.trim();
+            colorString = title + " - " + color;
+        }
+
+        public int getHex() {
+            return hex;
+        }
+        /**
+         * @return "[Name of Color] - [Hex Code]"
+         */
+        @Override
+        public String toString(){
+            return colorString;
+        }
+    }
 
 }
