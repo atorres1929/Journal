@@ -1,46 +1,39 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    style="@style/AppTheme.NoActionBar">
-
-    <TextView
-        android:id="@+id/singlerow"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TextView" />
+    android:layout_height="match_parent">
 
     <HorizontalScrollView
-        android:layout_width="match_parent"
-        android:layout_height="49dp"
         android:id="@+id/horizontalScrollView"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true">
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/horizontal_scroll_button_size"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:orientation="horizontal" >
+            android:orientation="horizontal">
 
             <ImageButton
                 android:id="@+id/unindentButton"
-                android:layout_width="@dimen/horizontal_scroll_button_width"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/horizontal_scroll_button_size"
+                android:layout_height="@dimen/horizontal_scroll_button_size"
                 android:background="@drawable/custom_button_bordered"
                 android:src="@mipmap/ic_unindent" />
 
             <ImageButton
                 android:id="@+id/indentButton"
-                android:layout_width="@dimen/horizontal_scroll_button_width"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/horizontal_scroll_button_size"
+                android:layout_height="@dimen/horizontal_scroll_button_size"
                 android:background="@drawable/custom_button_bordered"
                 android:src="@mipmap/ic_indent" />
 
             <ToggleButton
                 android:id="@+id/boldButton"
-                android:layout_width="@dimen/horizontal_scroll_button_width"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/horizontal_scroll_button_size"
+                android:layout_height="@dimen/horizontal_scroll_button_size"
                 android:background="@drawable/custom_togglebutton_bordered"
                 android:fontFamily="serif"
                 android:textColor="@android:color/white"
@@ -51,8 +44,8 @@
 
             <ToggleButton
                 android:id="@+id/italicButton"
-                android:layout_width="@dimen/horizontal_scroll_button_width"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/horizontal_scroll_button_size"
+                android:layout_height="@dimen/horizontal_scroll_button_size"
                 android:background="@drawable/custom_togglebutton_bordered"
                 android:fontFamily="serif"
                 android:textColor="@android:color/white"
@@ -63,8 +56,8 @@
 
             <ToggleButton
                 android:id="@+id/underlineButton"
-                android:layout_width="@dimen/horizontal_scroll_button_width"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/horizontal_scroll_button_size"
+                android:layout_height="@dimen/horizontal_scroll_button_size"
                 android:background="@drawable/custom_togglebutton_bordered"
                 android:fontFamily="serif"
                 android:textColor="@android:color/white"
@@ -74,22 +67,22 @@
 
             <ImageButton
                 android:id="@+id/foregroundColorButton"
-                android:layout_width="@dimen/horizontal_scroll_button_width"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/horizontal_scroll_button_size"
+                android:layout_height="@dimen/horizontal_scroll_button_size"
                 android:background="@drawable/custom_button_bordered"
                 android:src="@mipmap/ic_textcolor" />
 
             <ImageButton
                 android:id="@+id/backgroundColorButton"
-                android:layout_width="@dimen/horizontal_scroll_button_width"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/horizontal_scroll_button_size"
+                android:layout_height="@dimen/horizontal_scroll_button_size"
                 android:background="@drawable/custom_button_bordered"
                 android:src="@mipmap/ic_highlighter" />
 
             <ToggleButton
                 android:id="@+id/strikeThroughButton"
-                android:layout_width="@dimen/horizontal_scroll_button_width"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/horizontal_scroll_button_size"
+                android:layout_height="@dimen/horizontal_scroll_button_size"
                 android:background="@drawable/custom_togglebutton_bordered"
                 android:fontFamily="serif"
                 android:textColor="@android:color/white"
@@ -99,8 +92,8 @@
 
             <Button
                 android:id="@+id/subscriptButton"
-                android:layout_width="@dimen/horizontal_scroll_button_width"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/horizontal_scroll_button_size"
+                android:layout_height="@dimen/horizontal_scroll_button_size"
                 android:background="@drawable/custom_button_bordered"
                 android:fontFamily="serif"
                 android:textAllCaps="false"
@@ -109,8 +102,8 @@
 
             <Button
                 android:id="@+id/superscriptButton"
-                android:layout_width="@dimen/horizontal_scroll_button_width"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/horizontal_scroll_button_size"
+                android:layout_height="@dimen/horizontal_scroll_button_size"
                 android:background="@drawable/custom_button_bordered"
                 android:fontFamily="serif"
                 android:textAllCaps="false"
@@ -123,40 +116,29 @@
     <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="267dp"
-        app:layout_behavior="android.support.design.widget.AppBarLayout$ScrollingViewBehavior"
-        android:layout_below="@+id/horizontalScrollView"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
-        android:layout_alignParentBottom="true">
+        android:layout_below="@+id/horizontalScrollView"
+        app:layout_behavior="android.support.design.widget.AppBarLayout$ScrollingViewBehavior">
 
-        <RelativeLayout
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:scrollbarAlwaysDrawHorizontalTrack="false"
+            android:scrollbarAlwaysDrawVerticalTrack="true">
 
-            <ScrollView
+            <com.artifexiumgames.journal.RichEditText.RichEditText
+                android:id="@+id/newEntryTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:background="@color/colorPrimary"
-                android:padding="0dp"
-                android:scrollbarAlwaysDrawHorizontalTrack="false"
-                android:scrollbarAlwaysDrawVerticalTrack="true"
-                android:textAlignment="textStart"
-                android:visibility="visible"
-                tools:context="com.artifexiumgames.journal.Fragment.NewEntryFragment">
-
-                <com.artifexiumgames.journal.RichEditText.RichEditText
-                    android:id="@+id/newEntryTextView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif"
-                    android:gravity="top|start"
-                    android:inputType="textCapSentences|textAutoCorrect|textAutoComplete|textMultiLine|textNoSuggestions"
-                    android:text="@string/large_text"
-                    android:textColor="@android:color/white"
-                    android:textSize="20sp" />
-            </ScrollView>
-
-        </RelativeLayout>
+                android:background="@android:color/white"
+                android:fontFamily="sans-serif"
+                android:gravity="top|start"
+                android:inputType="textCapSentences|textAutoCorrect|textAutoComplete|textMultiLine"
+                android:text="@string/large_text"
+                android:textSize="20sp" />
+        </ScrollView>
     </android.support.v4.widget.NestedScrollView>
 
 </RelativeLayout>
