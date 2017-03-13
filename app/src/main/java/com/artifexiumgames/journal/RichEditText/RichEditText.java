@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
@@ -39,8 +40,11 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
 
 import static android.R.id.text1;
 
@@ -156,7 +160,7 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
         addTextChangedListener(this);
         setRelativeSize(0.5f);
         setNumTabs(4);
-        setHighlightAlpha(191);
+        setHighlightAlpha(168);
         colorList = new ArrayList<>();
         try {
             colorList.add(new ColorString("Black", "#000000"));
@@ -245,7 +249,7 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
                 }
             }
 
-            if (span instanceof MyUnderlineSpan) {
+            if (span instanceof RichEditUnderlineSpan) {
                 isSelectionUnderlined = true;
             }
 
@@ -302,7 +306,7 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
             getText().setSpan(new StyleSpan(Typeface.ITALIC), start, start + count, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         if (underlineButton != null && underlineButton.isChecked()) {
-            getText().setSpan(new MyUnderlineSpan(), start, start + count, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            getText().setSpan(new RichEditUnderlineSpan(), start, start + count, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         if (strikeThroughButton != null && strikeThroughButton.isChecked()) {
             getText().setSpan(new StrikethroughSpan(), start, start + count, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -332,50 +336,6 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
     @Override
     public void afterTextChanged(Editable s) {
         //Necessary to implement TextWatcher
-    }
-
-    /**
-     * Handles the clicks of buttons referenced to this editor.
-     * @param v the view from which the clicks are recieved.
-     *          <br>
-     *          i.e. this editor
-     */
-    @Override
-    public void onClick(View v) {
-        int id = v.getId();
-        if (id == boldButton.getId()){
-            boldAction();
-        }
-        else if (id == italicButton.getId()){
-            italicAction();
-        }
-        else if (id == underlineButton.getId()){
-            underlineAction();
-        }
-        else if (id == strikeThroughButton.getId()){
-            strikethroughAction();
-        }
-        else if (id == subscriptButton.getId()) {
-            subscriptAction();
-        }
-        else if (id == superscriptButton.getId()) {
-            superscriptAction();
-        }
-        else if (id == indentButton.getId()){
-            indentAction();
-        }
-        else if (id == unindentButton.getId()){
-            unindentAction();
-        }
-        else if (id == textColorButton.getId()){
-            textColorAction();
-        }
-        else if (id == highlightColorButton.getId()){
-            highlightColorAction();
-        }
-        else{
-            Log.e(TAG, "Button pressed did not match any known Ids"); //TODO throw an error?
-        }
     }
 
     //TODO document
@@ -436,90 +396,195 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
     }
 
     /**
-     * Applies or style to the text
+     * Handles the clicks of buttons referenced to this editor.
+     * @param v the view from which the clicks are recieved.
+     *          <br>
+     *          i.e. this editor
+     */
+    @Override
+    public void onClick(View v) {
+        int id = v.getId();
+        try {
+            if (id == boldButton.getId()) {
+                updateTextStyles(boldButton, StyleSpan.class, Typeface.BOLD);
+            } else if (id == italicButton.getId()) {
+                updateTextStyles(italicButton, StyleSpan.class, Typeface.ITALIC);
+            } else if (id == underlineButton.getId()) {
+                updateTextStyles(underlineButton, RichEditUnderlineSpan.class, null);
+            } else if (id == strikeThroughButton.getId()) {
+                updateTextStyles(strikeThroughButton, StrikethroughSpan.class, null);
+            } else if (id == subscriptButton.getId()) {
+                subscriptAction();
+            } else if (id == superscriptButton.getId()) {
+                superscriptAction();
+            } else if (id == indentButton.getId()) {
+                indentAction();
+            } else if (id == unindentButton.getId()) {
+                unindentAction();
+            } else if (id == textColorButton.getId()) {
+                textColorAction();
+            } else if (id == highlightColorButton.getId()) {
+                highlightColorAction();
+            } else {
+                Log.e(TAG, "Button pressed did not match any known Ids"); //TODO throw an error?
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error updating text styles", e);
+        }
+    }
+
+    protected void updateTextStyles(ToggleButton button, Class c, @Nullable Integer typeFaceParam) throws Exception {
+        int selStart = this.getSelectionStart();
+        int selEnd = this.getSelectionEnd();
+        Editable text = getText();
+        Constructor constructor;
+
+        if (typeFaceParam == null)
+             constructor = c.getConstructor(); //Supports the rest of the spans
+        else
+            constructor = c.getConstructor(Integer.class); //Supports StyleSpans
+
+        if (button.isChecked()) {
+            if (selStart != selEnd) {
+                String[] words = text.subSequence(selStart, selEnd).toString().split(" ");
+                int i = 0;
+                for (String word : words) {
+                    if (typeFaceParam == null)
+                        text.setSpan(constructor.newInstance(), selStart + i, selStart + i + word.length() + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    else
+                        text.setSpan(constructor.newInstance(typeFaceParam), selStart + i, selStart + i + word.length() + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    i += word.length() + 1;
+                }
+            }
+
+            //Find word at cursor and set bold style
+            else {
+                boolean startFound = false;
+                boolean endFound = false;
+                int wordStart = -1;
+                int wordEnd = -1;
+                int i = 0;
+                try {
+                    while (!startFound) {
+                        if (text.charAt(selStart - i) != ' ') {
+                            i += 1;
+                        } else {
+                            wordStart = selStart - i;
+                            startFound = true;
+                        }
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    Log.d(TAG, "word search reached zero while updating text style");
+                    wordStart = -1; //-1 because algorithm adds 1 at end to compensate for spaces
+                }
+
+                try {
+                    i = 0;
+                    while (!endFound) {
+                        if (text.charAt(selStart + i) != ' ') {
+                            i += 1;
+                        } else {
+                            wordEnd = selStart + i;
+                            endFound = true;
+                        }
+                    }
+                } catch (IndexOutOfBoundsException e){
+                    Log.d(TAG, "word search reached end of text while updating text style");
+                    wordEnd = getText().length();
+                }
+                if (typeFaceParam == null)
+                    text.setSpan(constructor.newInstance(), wordStart+1, wordEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                else
+                    text.setSpan(constructor.newInstance(typeFaceParam), wordStart+1, wordEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+        }
+        else if (!button.isChecked()) {
+            if (constructor.newInstance() instanceof StyleSpan) {
+                removeSpansWithinSelection(((StyleSpan) constructor.newInstance()).getStyle());
+            }
+            else {
+                removeSpansWithinSelection(constructor.newInstance().getClass());
+            }
+        }
+    }
+
+    /**
+     * Styles the text depending on the state of the button
      * <br>
-     * <code>if (button.isChecked() & selStart != selEnd)</code>
+     * <code>if (button.isChecked())</code>
      * <br>
      * <code>&nbsp; &nbsp; apply style to selection</code>
      * <br>
      * <code>else if (!button.isChecked())</code>
      * <br>
      * <code>&nbsp; &nbsp; remove style from thext</code>
-     * @see #removeSpansWithinSelection(int)
+     * @see #updateTextStyles(ToggleButton, Class, Integer)
      */
     public void boldAction(){
-        int start = this.getSelectionStart();
-        int end = this.getSelectionEnd();
-        if (boldButton.isChecked() && start != end) {
-            this.getText().setSpan(new StyleSpan(Typeface.BOLD), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        } else if (!boldButton.isChecked()) {
-            removeSpansWithinSelection(Typeface.BOLD);
+        try {
+            updateTextStyles(boldButton, StyleSpan.class, Typeface.BOLD);
+        } catch (Exception e) {
+            Log.e(TAG, "Error while performing boldAction");
         }
     }
 
     /**
-     * Applies or style to the text
+     * Styles the text depending on the state of the button
      * <br>
-     * <code>if (button.isChecked() & selStart != selEnd)</code>
+     * <code>if (button.isChecked())</code>
      * <br>
      * <code>&nbsp; &nbsp; apply style to selection</code>
      * <br>
      * <code>else if (!button.isChecked())</code>
      * <br>
      * <code>&nbsp; &nbsp; remove style from thext</code>
-     * @see #removeSpansWithinSelection(int)
+     * @see #updateTextStyles(ToggleButton, Class, Integer)
      */
     public void italicAction(){
-        int start = this.getSelectionStart();
-        int end = this.getSelectionEnd();
-        if (italicButton.isChecked() && start != end) {
-            this.getText().setSpan(new StyleSpan(Typeface.ITALIC), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        } else if (!italicButton.isChecked()) {
-            removeSpansWithinSelection(Typeface.ITALIC);
+        try {
+            updateTextStyles(italicButton, StyleSpan.class, Typeface.ITALIC);
+        } catch (Exception e) {
+            Log.e(TAG, "Error while performing italicAction");
         }
     }
 
     /**
-     * Applies or style to the text
+     * Styles the text depending on the state of the button
      * <br>
-     * <code>if (button.isChecked() & selStart != selEnd)</code>
+     * <code>if (button.isChecked())</code>
      * <br>
      * <code>&nbsp; &nbsp; apply style to selection</code>
      * <br>
      * <code>else if (!button.isChecked())</code>
      * <br>
      * <code>&nbsp; &nbsp; remove style from thext</code>
-     * @see #removeSpansWithinSelection(Class[])
+     * @see #updateTextStyles(ToggleButton, Class, Integer)
      */
     public void underlineAction(){
-        int start = this.getSelectionStart();
-        int end = this.getSelectionEnd();
-        if (underlineButton.isChecked() && start != end) {
-            this.getText().setSpan(new MyUnderlineSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        } else if (!underlineButton.isChecked()) {
-            removeSpansWithinSelection(MyUnderlineSpan.class);
+        try {
+            updateTextStyles(underlineButton, RichEditUnderlineSpan.class, null);
+        } catch (Exception e) {
+            Log.e(TAG, "Error while performing underlineAction");
         }
     }
 
     /**
-     * Applies or style to the text
+     * Styles the text depending on the state of the button
      * <br>
-     * <code>if (button.isChecked() & selStart != selEnd)</code>
+     * <code>if (button.isChecked())</code>
      * <br>
      * <code>&nbsp; &nbsp; apply style to selection</code>
      * <br>
      * <code>else if (!button.isChecked())</code>
      * <br>
      * <code>&nbsp; &nbsp; remove style from thext</code>
-     * @see #removeSpansWithinSelection(Class[])
+     * @see #updateTextStyles(ToggleButton, Class, Integer)
      */
     public void strikethroughAction(){
-        int start = this.getSelectionStart();
-        int end = this.getSelectionEnd();
-        if (strikeThroughButton.isChecked() && start != end) {
-            this.getText().setSpan(new StrikethroughSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        } else if (!strikeThroughButton.isChecked()) {
-            removeSpansWithinSelection(StrikethroughSpan.class);
+        try {
+            updateTextStyles(strikeThroughButton, StrikethroughSpan.class, null);
+        } catch (Exception e) {
+            Log.e(TAG, "Error while performing strikethroughAction");
         }
     }
 
@@ -532,35 +597,42 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
      */
     private int selectionEndBeforeFocusChange;
 
+    /**
+     * Shows a dialog through which you can enter text that will be subscripted
+     * @see #relativeSizeFormat(MetricAffectingSpan)
+     */
+    //TODO Make subscript/superscript a non dialog input
+    public void subscriptAction(){
+        relativeSizeFormat(new SubscriptSpan());
+    }
 
+    /**
+     * Shows a dialog through which you can enter text that will be superscripted
+     * @see #relativeSizeFormat(MetricAffectingSpan)
+     */
+    //TODO Make subscript/superscript a non dialog input
+    public void superscriptAction() {
+        relativeSizeFormat(new SuperscriptSpan());
+    }
+
+    //TODO document
     public void textColorAction(){
         selectionStartBeforeFocusChange = getSelectionStart();
         selectionEndBeforeFocusChange = getSelectionEnd();
         changingTextColor = true;
         mainColorChooserDialog.setTitle("Text Color");
         mainColorChooserDialog.show();
+        //application of style handled in setCurrentTextColor(ColorDrawable color)
     }
 
+    //TODO document
     public void highlightColorAction(){
         selectionStartBeforeFocusChange = getSelectionStart();
         selectionEndBeforeFocusChange = getSelectionEnd();
         changingTextColor = false;
         mainColorChooserDialog.setTitle("Highlight Color");
         mainColorChooserDialog.show();
-    }
-
-    /**
-     * @see #relativeSizeFormat(MetricAffectingSpan)
-     */
-    public void subscriptAction(){
-        relativeSizeFormat(new SubscriptSpan());
-    }
-
-    /**
-     * @see #relativeSizeFormat(MetricAffectingSpan)
-     */
-    public void superscriptAction() {
-        relativeSizeFormat(new SuperscriptSpan());
+        //application of style handled in setCurrentHighlightColor(ColorDrawable color)
     }
 
     /**
@@ -609,19 +681,29 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
     }
 
     /**
-     * Removes the spans within the selection matching the class given.
+     * Removes the spans within the selection matching the class given, and readjusts the span previous
+     * to it to be properly formatted.
      *
-     * @param classes Not all spans are referenced by a {@link Typeface} Id
+     * @param c Not all spans are referenced by a {@link Typeface} Id
      *                therefore, they are found by comparing their class to the class passed by this method
-     * @see #boldAction()
-     * @see #italicAction()
+     *
+     * @see #underlineAction()
+     * @see #strikethroughAction()
+     * @see #textColorAction() ()
+     * @see #highlightColorAction()
      */
-    protected void removeSpansWithinSelection(Class... classes) {
+    protected void removeSpansWithinSelection(Class c) {
+        List<ParcelableSpan> spanList = Arrays.asList(getText().getSpans(0, getText().length(), ParcelableSpan.class));
         for (ParcelableSpan span : this.getText().getSpans(getSelectionStart(), getSelectionEnd(), ParcelableSpan.class)) {
-            for (Class c : classes) {
-                if (span.getClass().equals(c)) {
-                    this.getText().removeSpan(span);
+            if (span.getClass().equals(c)) {
+                int index = spanList.indexOf(span);
+                if (index > 0) {
+                    ParcelableSpan previous = spanList.get(index-1);
+                    int previousStart = getText().getSpanStart(previous);
+                    int previousEnd = getText().getSpanEnd(previous);
+                    getText().setSpan(previous, previousStart, previousEnd - 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
+                this.getText().removeSpan(span);
             }
         }
     }
@@ -630,10 +712,8 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
      * Removes the spans within the selection matching the {@link StyleSpan} Id given
      *
      * @param spanId the Id of the style to be removed. See {@link Typeface} for Ids.
-     * @see #underlineAction()
-     * @see #strikethroughAction()
-     * @see #textColorAction() ()
-     * @see #highlightColorAction() ()
+     * @see #boldAction()
+     * @see #italicAction()
      */
     protected void removeSpansWithinSelection(int spanId) {
         for (StyleSpan span : this.getText().getSpans(getSelectionStart(), getSelectionEnd(), StyleSpan.class)) {
@@ -934,12 +1014,13 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
     /**
      * Necessary to differentiate between the underlining done by the SpellChecker and the
      * underlining done by the user
-     *
-     * @see #onSelectionChanged(int, int)
      */
-
     @SuppressLint("ParcelCreator")
-    protected class MyUnderlineSpan extends UnderlineSpan {
+    public static class RichEditUnderlineSpan extends UnderlineSpan {
+
+        public RichEditUnderlineSpan(){
+            //Necessary default constructor for reflection
+        }
 
     }
 
@@ -947,7 +1028,7 @@ public class RichEditText extends AppCompatEditText implements TextWatcher, View
      * A simple class that holds the information for the name of a color and it's hex code.
      * Will throw an {@link IOException} if information is put in incorrectly
      */
-    public static class ColorString {
+    protected class ColorString {
 
         private int hex;
         private String colorString;

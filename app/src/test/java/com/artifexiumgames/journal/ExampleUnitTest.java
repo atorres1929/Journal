@@ -35,7 +35,7 @@ public class ExampleUnitTest {
     @Test
     public void alpha() throws Exception {
         int BaseColor = -1;
-        int alpha = 127;
+        int alpha = -127;
         if (alpha < 128){
             alpha += 1;
         }
@@ -48,6 +48,13 @@ public class ExampleUnitTest {
         final int useColor = (BaseColor << 8 >>> 8) | (useAlpha << 24);
         System.out.println("\nUse Alpha " + useAlpha);
         System.out.println("Color " + useColor);
+    }
 
+    @Test
+    public void understandingRsh() throws Exception {
+        int alpha = 127;
+        System.out.println(Integer.toBinaryString(alpha));
+        System.out.println(Integer.toBinaryString(alpha >> 7));
+        System.out.println(alpha >> 7);
     }
 }

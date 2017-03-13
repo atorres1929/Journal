@@ -16,19 +16,25 @@
             android:layout_height="match_parent"
             android:orientation="horizontal">
 
-            <ImageButton
-                android:id="@+id/unindentButton"
+            <Button
+                android:id="@+id/subscriptButton"
                 android:layout_width="@dimen/horizontal_scroll_button_size"
                 android:layout_height="@dimen/horizontal_scroll_button_size"
                 android:background="@drawable/custom_button_bordered"
-                android:src="@mipmap/ic_unindent" />
+                android:fontFamily="serif"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="24sp" />
 
-            <ImageButton
-                android:id="@+id/indentButton"
+            <Button
+                android:id="@+id/superscriptButton"
                 android:layout_width="@dimen/horizontal_scroll_button_size"
                 android:layout_height="@dimen/horizontal_scroll_button_size"
                 android:background="@drawable/custom_button_bordered"
-                android:src="@mipmap/ic_indent" />
+                android:fontFamily="serif"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="24sp" />
 
             <ToggleButton
                 android:id="@+id/boldButton"
@@ -66,6 +72,20 @@
                 android:textSize="24sp" />
 
             <ImageButton
+                android:id="@+id/unindentButton"
+                android:layout_width="@dimen/horizontal_scroll_button_size"
+                android:layout_height="@dimen/horizontal_scroll_button_size"
+                android:background="@drawable/custom_button_bordered"
+                android:src="@mipmap/ic_unindent" />
+
+            <ImageButton
+                android:id="@+id/indentButton"
+                android:layout_width="@dimen/horizontal_scroll_button_size"
+                android:layout_height="@dimen/horizontal_scroll_button_size"
+                android:background="@drawable/custom_button_bordered"
+                android:src="@mipmap/ic_indent" />
+
+            <ImageButton
                 android:id="@+id/foregroundColorButton"
                 android:layout_width="@dimen/horizontal_scroll_button_size"
                 android:layout_height="@dimen/horizontal_scroll_button_size"
@@ -88,26 +108,6 @@
                 android:textColor="@android:color/white"
                 android:textOff="@string/button_strikethrough"
                 android:textOn="@string/button_strikethrough"
-                android:textSize="24sp" />
-
-            <Button
-                android:id="@+id/subscriptButton"
-                android:layout_width="@dimen/horizontal_scroll_button_size"
-                android:layout_height="@dimen/horizontal_scroll_button_size"
-                android:background="@drawable/custom_button_bordered"
-                android:fontFamily="serif"
-                android:textAllCaps="false"
-                android:textColor="@android:color/white"
-                android:textSize="24sp" />
-
-            <Button
-                android:id="@+id/superscriptButton"
-                android:layout_width="@dimen/horizontal_scroll_button_size"
-                android:layout_height="@dimen/horizontal_scroll_button_size"
-                android:background="@drawable/custom_button_bordered"
-                android:fontFamily="serif"
-                android:textAllCaps="false"
-                android:textColor="@android:color/white"
                 android:textSize="24sp" />
 
         </LinearLayout>
