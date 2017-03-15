@@ -1,189 +1,144 @@
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    style="@style/AppTheme.NoActionBar">
+    android:layout_height="match_parent">
 
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/appbar"
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent">
+    <HorizontalScrollView
+        android:id="@+id/horizontalScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/horizontal_scroll_button_size"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true">
 
-        <android.support.design.widget.CollapsingToolbarLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:toolbarId="@+id/toolbar"
-            app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
-            app:contentScrim="?attr/colorPrimary">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
 
-            <TableLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+            <Button
+                android:id="@+id/subscriptButton"
+                android:layout_width="@dimen/horizontal_scroll_button_size"
+                android:layout_height="@dimen/horizontal_scroll_button_size"
+                android:background="@drawable/custom_button_bordered"
+                android:fontFamily="serif"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="24sp" />
 
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" >
+            <Button
+                android:id="@+id/superscriptButton"
+                android:layout_width="@dimen/horizontal_scroll_button_size"
+                android:layout_height="@dimen/horizontal_scroll_button_size"
+                android:background="@drawable/custom_button_bordered"
+                android:fontFamily="serif"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="24sp" />
 
-                    <TableLayout
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1">
+            <ToggleButton
+                android:id="@+id/boldButton"
+                android:layout_width="@dimen/horizontal_scroll_button_size"
+                android:layout_height="@dimen/horizontal_scroll_button_size"
+                android:background="@drawable/custom_togglebutton_bordered"
+                android:fontFamily="serif"
+                android:textColor="@android:color/white"
+                android:textOff="@string/button_bold"
+                android:textOn="@string/button_bold"
+                android:textSize="24sp"
+                android:textStyle="bold" />
 
-                        <TableRow
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent">
+            <ToggleButton
+                android:id="@+id/italicButton"
+                android:layout_width="@dimen/horizontal_scroll_button_size"
+                android:layout_height="@dimen/horizontal_scroll_button_size"
+                android:background="@drawable/custom_togglebutton_bordered"
+                android:fontFamily="serif"
+                android:textColor="@android:color/white"
+                android:textOff="@string/button_italic"
+                android:textOn="@string/button_italic"
+                android:textSize="24sp"
+                android:textStyle="italic" />
 
-                            <Button
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:id="@+id/tabButton"
-                                android:background="@drawable/custom_button_bordered"
-                                android:layout_weight="1"
-                                android:textColor="@android:color/white"
-                                android:text="@string/button_tab" />
+            <ToggleButton
+                android:id="@+id/underlineButton"
+                android:layout_width="@dimen/horizontal_scroll_button_size"
+                android:layout_height="@dimen/horizontal_scroll_button_size"
+                android:background="@drawable/custom_togglebutton_bordered"
+                android:fontFamily="serif"
+                android:textColor="@android:color/white"
+                android:textOff="@string/button_underline"
+                android:textOn="@string/button_underline"
+                android:textSize="24sp" />
 
-                            <Button
-                                android:text="@string/button_time"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:id="@+id/timeButton"
-                                android:background="@drawable/custom_button_bordered"
-                                tools:ignore="RelativeOverlap"
-                                android:layout_weight="1"
-                                android:textColor="@android:color/white" />
+            <ImageButton
+                android:id="@+id/unindentButton"
+                android:layout_width="@dimen/horizontal_scroll_button_size"
+                android:layout_height="@dimen/horizontal_scroll_button_size"
+                android:background="@drawable/custom_button_bordered"
+                android:src="@mipmap/ic_unindent" />
 
-                            <Button
-                                android:text="@string/button_date"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:id="@+id/dateButton"
-                                android:background="@drawable/custom_button_bordered"
-                                tools:ignore="RelativeOverlap"
-                                android:layout_weight="1"
-                                android:textColor="@android:color/white" />
+            <ImageButton
+                android:id="@+id/indentButton"
+                android:layout_width="@dimen/horizontal_scroll_button_size"
+                android:layout_height="@dimen/horizontal_scroll_button_size"
+                android:background="@drawable/custom_button_bordered"
+                android:src="@mipmap/ic_indent" />
 
-                            <Button
-                                android:text="@string/button_down"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:id="@+id/scrollDownButton"
-                                android:background="@drawable/custom_button_bordered"
-                                android:layout_weight="1"
-                                android:textColor="@android:color/white" />
+            <ImageButton
+                android:id="@+id/foregroundColorButton"
+                android:layout_width="@dimen/horizontal_scroll_button_size"
+                android:layout_height="@dimen/horizontal_scroll_button_size"
+                android:background="@drawable/custom_button_bordered"
+                android:src="@mipmap/ic_textcolor" />
 
-                            <Button
-                                android:text="@string/button_up"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:id="@+id/scrollUpButton"
-                                android:background="@drawable/custom_button_bordered"
-                                tools:ignore="RelativeOverlap"
-                                android:layout_weight="1"
-                                android:textColor="@android:color/white" />
+            <ImageButton
+                android:id="@+id/backgroundColorButton"
+                android:layout_width="@dimen/horizontal_scroll_button_size"
+                android:layout_height="@dimen/horizontal_scroll_button_size"
+                android:background="@drawable/custom_button_bordered"
+                android:src="@mipmap/ic_highlighter" />
 
-                        </TableRow>
+            <ToggleButton
+                android:id="@+id/strikeThroughButton"
+                android:layout_width="@dimen/horizontal_scroll_button_size"
+                android:layout_height="@dimen/horizontal_scroll_button_size"
+                android:background="@drawable/custom_togglebutton_bordered"
+                android:fontFamily="serif"
+                android:textColor="@android:color/white"
+                android:textOff="@string/button_strikethrough"
+                android:textOn="@string/button_strikethrough"
+                android:textSize="24sp" />
 
-                        <TableRow
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center">
-
-                            <ToggleButton
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:id="@+id/boldToggleButton"
-                                android:background="@drawable/custom_button_bordered"
-                                android:text="@string/button_bold"
-                                android:textColor="@android:color/white"
-                                android:textOff="@string/button_bold"
-                                android:textOn="@string/button_bold"
-                                android:layout_weight="1"
-                                android:textStyle="bold"
-                                android:fontFamily="serif" />
-
-                            <ToggleButton
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:id="@+id/italicToggleButton"
-                                android:background="@drawable/custom_button_bordered"
-                                android:text="@string/button_bold"
-                                android:textColor="@android:color/white"
-                                android:textOff="@string/button_italic"
-                                android:textOn="@string/button_italic"
-                                android:layout_weight="1"
-                                android:textStyle="normal|italic"
-                                android:fontFamily="serif" />
-
-                            <ToggleButton
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:id="@+id/underlineToggleButton"
-                                android:background="@drawable/custom_button_bordered"
-                                android:textColor="@android:color/white"
-                                android:textOff="@string/button_underline"
-                                android:textOn="@string/button_underline"
-                                android:layout_weight="1"
-                                android:fontFamily="serif" />
-
-                        </TableRow>
-
-                    </TableLayout>
-                </TableRow>
-
-            </TableLayout>
-
-        </android.support.design.widget.CollapsingToolbarLayout>
-    </android.support.design.widget.AppBarLayout>
+        </LinearLayout>
+    </HorizontalScrollView>
 
     <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="267dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/horizontalScrollView"
         app:layout_behavior="android.support.design.widget.AppBarLayout$ScrollingViewBehavior">
 
-        <RelativeLayout
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:scrollbarAlwaysDrawHorizontalTrack="false"
+            android:scrollbarAlwaysDrawVerticalTrack="true">
 
-            <ScrollView
+            <com.artifexiumgames.journal.RichEditText.RichEditText
+                android:id="@+id/newEntryTextView"
                 android:layout_width="match_parent"
-                tools:context="com.artifexiumgames.journal.NewEntryFragment"
-                android:background="@color/colorPrimary"
-                android:textAlignment="textStart"
-                android:scrollbarAlwaysDrawHorizontalTrack="false"
-                android:scrollbarAlwaysDrawVerticalTrack="true"
-                android:visibility="visible"
-                android:padding="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true">
-
-                <!-- TODO: Update blank fragment layout -->
-
-                <MultiAutoCompleteTextView
-                    android:text="@string/large_text"
-                    android:layout_width="match_parent"
-                    android:id="@+id/newEntryTextView"
-                    android:gravity="top|start"
-                    android:textColor="@android:color/white"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_below="@+id/tabButton"
-                    android:layout_centerHorizontal="true" />
-            </ScrollView>
-
-        </RelativeLayout>
+                android:background="@android:color/white"
+                android:fontFamily="sans-serif"
+                android:gravity="top|start"
+                android:inputType="textCapSentences|textAutoCorrect|textAutoComplete|textMultiLine"
+                android:text="@string/large_text"
+                android:textSize="20sp" />
+        </ScrollView>
     </android.support.v4.widget.NestedScrollView>
 
-    <android.support.design.widget.FloatingActionButton
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        app:layout_anchor="@+id/appbar"
-        app:layout_anchorGravity="bottom|right"
-        android:src="@android:drawable/ic_menu_save"
-        android:layout_marginRight="16dp"
-        android:clickable="true"
-        app:fabSize="mini"
-        android:layout_gravity="bottom|left" />
-</android.support.design.widget.CoordinatorLayout>
+</RelativeLayout>
