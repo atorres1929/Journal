@@ -29,3 +29,6 @@
 /.idea
 /templates
 androidStudioFirstRun.xml
+colors.scheme.xml
+customization.xml
+debugger.xml
